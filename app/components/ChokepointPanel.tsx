@@ -3,7 +3,7 @@ import { Chokepoint, Factor } from "@/app/lib/cases";
 import { useLang, useT } from "@/app/lib/i18n";
 import { useLiveChokepoints, useLiveFactors } from "@/app/lib/markets";
 import { fmtUsd } from "@/app/lib/risk";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 function severityTone(s: Chokepoint["severity"]) {
   switch (s) {
@@ -57,7 +57,9 @@ export default function ChokepointPanel({
   const { lang } = useLang();
   const { chokepoints, live: liveCp, lastFetch } = useLiveChokepoints(baseCp);
   const { factors, live: liveFactors } = useLiveFactors(baseFactors);
-  const live = { ...liveCp, ...liveFactors };
+  // Memoize the merged live map. Bare `{ ...liveCp, ...liveFactors }` would
+  // be a new object every render → child useEffect deps would fire forever.
+  const live = useMemo(() => ({ ...liveCp, ...liveFactors }), [liveCp, liveFactors]);
 
   const [probs, setProbs] = useState<Record<string, number>>(() => ({
     ...Object.fromEntries(chokepoints.map((c) => [c.id, c.probability])),

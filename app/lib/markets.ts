@@ -133,10 +133,15 @@ const TICKER_FACTORS: Factor[] = gatherAllFactors();
 export function useLiveTicker() {
   const cp = useLiveChokepoints(TICKER_BASE);
   const fa = useLiveFactors(TICKER_FACTORS);
+  // CRITICAL: memoize the merged live map. A naive `{ ...cp.live, ...fa.live }`
+  // creates a NEW object every render — downstream consumers that depend on
+  // `live` in useMemo/useEffect will see fresh identity each time, fire setState,
+  // re-render, and hit "Maximum update depth exceeded".
+  const live = useMemo(() => ({ ...cp.live, ...fa.live }), [cp.live, fa.live]);
   return {
     chokepoints: cp.chokepoints,
     factors: fa.factors,
-    live: { ...cp.live, ...fa.live },
+    live,
     loading: cp.loading || fa.loading,
   };
 }
