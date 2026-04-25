@@ -1,3 +1,5 @@
+#AttraX春潮Spring黑客松
+
 # Chokepoint
 
 > AI-powered parametric supply-chain delay insurance, priced live by Polymarket.
@@ -40,8 +42,6 @@ npm install
 export ANTHROPIC_API_KEY=sk-ant-...   # your key, never commit it
 npm run dev
 ```
-
-Open http://localhost:3000.
 
 ### China proxy note
 
