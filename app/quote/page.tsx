@@ -125,7 +125,7 @@ function QuoteInner() {
           </div>
         </section>
 
-        <aside className="col-span-12 lg:col-span-4 flex flex-col gap-4">
+        <aside className="col-span-12 lg:col-span-4 flex flex-col gap-4 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
           <InsureButton risk={risk} caseId={case_.id} currency={case_.currency} />
           <HedgeWaterfall risk={risk} currency={case_.currency} case_={case_} />
           <div className="panel-raised p-4 text-[11px] text-dim leading-relaxed">

@@ -255,7 +255,7 @@ function SplitInner() {
           </div>
         </section>
 
-        <aside className="col-span-12 lg:col-span-4 flex flex-col gap-4">
+        <aside className="col-span-12 lg:col-span-4 flex flex-col gap-4 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
           <div className="panel-raised p-4">
             <div className="label-kicker mb-2">
               /// {t("情景模拟 · 会赔多少?", "SCENARIO SIM · how much does it pay?")}
