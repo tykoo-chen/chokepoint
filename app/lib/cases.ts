@@ -48,6 +48,36 @@ export type Factor = {
   volume24h: number;
 };
 
+/**
+ * Who actually buys this policy. Resolved from Incoterms + LD clause analysis,
+ * surfaced from the connected enterprise Agent's contract data. Drives every
+ * piece of UI copy in customer-mode (we say "you" to this party).
+ */
+export type PolicyHolder = {
+  party: "buyer" | "seller";
+  partyName: string; // "中石化烟台炼厂"
+  reasonZh: string;  // "CFR 装船后风险已转给买方, 晚到中石化吃"
+  reasonEn: string;
+};
+
+/**
+ * One narrative scenario in the buyer's downside distribution. Replaces
+ * P50/P90/P99 in customer-mode. Each scenario must be tellable as a story
+ * (not a statistic) — what concretely goes wrong, how late, how much
+ * money out of the buyer's pocket, and what the policy bails out.
+ */
+export type Scenario = {
+  id: "A" | "B" | "C" | "D"; // A=normal, B=bumpy, C=tail, D=worst
+  nameZh: string; // 常态 / 一半概率 / 够呛 / 最坏
+  nameEn: string; // Normal / Bumpy / Tail / Worst
+  probability: number; // 0..1, sums to ~1 across the 4 scenarios
+  daysLate: number;    // days late in this scenario (0 for normal)
+  lossUsd: number;     // total $ hit on this voyage (0 for normal)
+  payoutUsd: number;   // policy pays back this much
+  storyZh: string;     // 1-2 sentence narrative ("Hormuz partial closure 5 days, you reroute via Lombok")
+  storyEn: string;
+};
+
 export type Case = {
   id: string;
   title: string;
@@ -67,15 +97,34 @@ export type Case = {
   altRouteLabelEn?: string;
   baselineTransitDays: number;
   bufferDays: number;
+  /**
+   * From the buyer's contract — the LD clause the buyer signed.
+   * This is the literal $/d the buyer owes their downstream customer if
+   * goods arrive late.
+   */
   contractPenaltyPerDayUsd: number;
+  /**
+   * From the buyer's ops finance model (read by the enterprise Agent).
+   * The REAL loss per day late = LD + spot scramble + idle resources +
+   * promo opportunity cost. Usually higher than the contract LD. This is
+   * the number the policy is sized against.
+   */
+  internalLossPerDayUsd?: number;
   /** "contract" = real clause in user-uploaded doc · "estimate" = industry typical */
   penaltySource?: "contract" | "estimate";
   penaltySourceNoteZh?: string;
   penaltySourceNoteEn?: string;
+  /** Where the internal loss/d number came from (Agent context source). */
+  internalLossSourceZh?: string;
+  internalLossSourceEn?: string;
   documentsSeenZh?: string[];
   documentsSeenEn?: string[];
   chokepointIds: string[];
   factors?: Factor[]; // extra factor exposures beyond chokepoints
+  /** Who buys this policy + why. Drives 2nd-person voice everywhere. */
+  policyHolder?: PolicyHolder;
+  /** 4 scenarios that replace P50/P90/P99 in customer-mode. */
+  scenarios?: Scenario[];
   ship: string;
   etd: string;
   eta: string;
@@ -252,7 +301,62 @@ export const CASES: Case[] = [
     altRouteLabelEn: "Lombok Strait bypass (+3d, avoids Singapore Strait congestion)",
     baselineTransitDays: 24,
     bufferDays: 6,
-    contractPenaltyPerDayUsd: 280_000,
+    contractPenaltyPerDayUsd: 200_000, // LD in the SPA: $2/bbl × 100k bbl/d
+    internalLossPerDayUsd: 280_000,    // ops finance model: LD + spot scramble + crack-spread compression
+    internalLossSourceZh: "中石化交易台 ops 模型 · 上周二刷新 · 含 LD + 现货抢料 + crack spread 压缩",
+    internalLossSourceEn: "Sinopec trading-desk ops model · refreshed Tuesday · LD + spot-scramble + crack-spread compression",
+    policyHolder: {
+      party: "buyer",
+      partyName: "中石化烟台炼厂",
+      reasonZh: "CFR · 货物装船那一刻风险就转给你了。船晚到 = 炼厂喂料断流, 你这边吃。",
+      reasonEn: "CFR · risk transferred to you the moment cargo crossed the ship's rail. Late = your refinery starves, you eat the loss.",
+    },
+    scenarios: [
+      {
+        id: "A",
+        nameZh: "正常",
+        nameEn: "Normal",
+        probability: 0.16,
+        daysLate: 0,
+        lossUsd: 0,
+        payoutUsd: 0,
+        storyZh: "船按时离港 → 24 天到烟台。零损失。这种情况下保单不赔, 保费就是你的成本。",
+        storyEn: "Ship departs on time → 24-day transit to Yantai. Zero loss. The policy pays nothing here — premium is just your cost.",
+      },
+      {
+        id: "B",
+        nameZh: "一半概率会落到这",
+        nameEn: "Coin-flip case",
+        probability: 0.50,
+        daysLate: 6,
+        lossUsd: 1_680_000,
+        payoutUsd: 1_680_000,
+        storyZh: "霍尔木兹封锁短暂松动后再紧 → 你绕 Lombok +6 天 → 你赔 $1.68M。保单全兜 (净 0)。",
+        storyEn: "Hormuz blockade briefly eases then tightens → you reroute via Lombok +6d → you owe $1.68M. Policy fully bails ($0 net).",
+      },
+      {
+        id: "C",
+        nameZh: "够呛 · 1/10 的票",
+        nameEn: "Tail · 1-in-10",
+        probability: 0.25,
+        daysLate: 14,
+        lossUsd: 3_920_000,
+        payoutUsd: 3_500_000,
+        storyZh: "Hormuz + Malacca 双卡, 加 Fed 6 月不动叠加 USD 强势 → 你晚 14 天 → 你赔 $3.92M。保单兜 $3.5M, 你自掏 $420K。",
+        storyEn: "Hormuz + Malacca double-stuck, Fed June hold compounds with strong USD → 14 days late → you owe $3.92M. Policy bails $3.5M, you self-pay $420K.",
+      },
+      {
+        id: "D",
+        nameZh: "最坏 1%",
+        nameEn: "Worst 1%",
+        probability: 0.09,
+        daysLate: 38,
+        lossUsd: 10_640_000,
+        payoutUsd: 5_000_000,
+        storyZh: "Hormuz 全封 + 俄乌停火 + 复合升级 → 你晚 38 天 → 你赔 $10.6M。保单封顶赔 $5M, 你自扛 $5.6M (尾部缺口)。",
+        storyEn: "Full Hormuz closure + RU-UA ceasefire flip + compounded escalation → 38d late → you owe $10.6M. Policy caps at $5M, you self-bear $5.6M (tail gap).",
+      },
+    ],
     chokepointIds: ["HORMUZ", "MALACCA"],
     factors: [
       {
@@ -402,7 +506,62 @@ export const CASES: Case[] = [
     altRouteLabelEn: "Full Cape of Good Hope reroute (+12d, avoids Red Sea; what major liners are doing right now)",
     baselineTransitDays: 32,
     bufferDays: 14, // summer promo prep buffer
-    contractPenaltyPerDayUsd: 9_500, // ~£7.5K/d stockout + promo penalty
+    contractPenaltyPerDayUsd: 9_500,   // LD signed with Costco / LWC / Wing Yip per-day-late
+    internalLossPerDayUsd: 14_200,     // LD + stockout cost + lost promo margin (4-month locked window)
+    internalLossSourceZh: "LEC Beverages 渠道运营模型 · 含 LD + 断货扣款 + 错过夏季促销窗的边际利润",
+    internalLossSourceEn: "LEC Beverages channel-ops model · LD + stockout chargeback + missed summer promo margin",
+    policyHolder: {
+      party: "buyer",
+      partyName: "LEC Beverages 英国",
+      reasonZh: "CIF · 卖方买的传统货损险, 但 ICC-A 不赔延误。晚到带来的渠道罚款 + 错过促销窗, 银行也要求你这一边另外保。",
+      reasonEn: "CIF · seller arranges cargo cover, but ICC-A excludes delay loss. Channel penalties + missed promo window fall on you; the bank requires you to carry separate delay cover.",
+    },
+    scenarios: [
+      {
+        id: "A",
+        nameZh: "正常",
+        nameEn: "Normal",
+        probability: 0.55,
+        daysLate: 0,
+        lossUsd: 0,
+        payoutUsd: 0,
+        storyZh: "船 32 天到 Felixstowe, 提前 4 个月排好的促销档期完美对齐。零损失, 保费就是成本。",
+        storyEn: "32-day transit to Felixstowe — perfectly aligned with the 4-months-ahead-locked promo schedule. Zero loss; premium is just cost.",
+      },
+      {
+        id: "B",
+        nameZh: "一半概率会落到这",
+        nameEn: "Coin-flip case",
+        probability: 0.30,
+        daysLate: 6,
+        lossUsd: 85_200,
+        payoutUsd: 85_200,
+        storyZh: "好望角绕行 + 北大西洋小风暴 → +6 天到港 → 你赔 $85K (含 Costco 断货扣款)。保单全兜 (净 0)。",
+        storyEn: "Cape detour + minor North Atlantic storm → +6 days to port → you owe $85K (includes Costco stockout chargeback). Policy fully bails (net 0).",
+      },
+      {
+        id: "C",
+        nameZh: "够呛 · 1/10 的票",
+        nameEn: "Tail · 1-in-10",
+        probability: 0.10,
+        daysLate: 14,
+        lossUsd: 198_800,
+        payoutUsd: 180_000,
+        storyZh: "BoE 4 月不降息 → 渠道客户砍单 → 同时苏伊士拥堵, 你晚 14 天 → 你赔 $199K, 保单兜 $180K, 自掏 $19K。",
+        storyEn: "BoE holds in April → channel orders trimmed + Suez congestion stacks → 14 days late → you owe $199K. Policy bails $180K, you self-pay $19K.",
+      },
+      {
+        id: "D",
+        nameZh: "最坏 5%",
+        nameEn: "Worst 5%",
+        probability: 0.05,
+        daysLate: 28,
+        lossUsd: 397_600,
+        payoutUsd: 280_000,
+        storyZh: "WTI 冲 $150 + BoE 鹰派 + 大西洋风暴 → 错过整个夏季最贵的促销窗 (6/1-7/15) → 你赔 $397K, 保单封顶 $280K, 自扛 $117K。",
+        storyEn: "WTI hits $150 + BoE hawkish + Atlantic storm → miss the entire premium summer promo window (6/1-7/15) → you owe $397K. Policy caps at $280K, you self-bear $117K.",
+      },
+    ],
     chokepointIds: ["BAB_EL_MANDEB", "SUEZ", "CAPE", "MALACCA"],
     factors: [
       {
@@ -533,7 +692,62 @@ export const CASES: Case[] = [
     altRouteLabelEn: "Suez sprint (-10d, but requires buying war-risk surcharge)",
     baselineTransitDays: 38,
     bufferDays: 7,
-    contractPenaltyPerDayUsd: 100_000, // £80K/d LD after buffer
+    contractPenaltyPerDayUsd: 100_000, // £80K/d LD signed with Heathrow
+    internalLossPerDayUsd: 130_000,    // LD + 40 idle engineers (£800/d each) + reputational + downstream re-mob
+    internalLossSourceZh: "LEC Robotics 项目部成本台账 · LD £80K/d + 40 名驻场工程师每天 £30K + 下游商业合同重排成本",
+    internalLossSourceEn: "LEC Robotics project-ops cost ledger · £80K/d LD + 40 on-site engineers at £30K/d combined + downstream commercial reschedule cost",
+    policyHolder: {
+      party: "seller",
+      partyName: "LEC Robotics",
+      reasonZh: "DAP · 你卖给 Heathrow, 货到 LHR 之前都是你的责任。LD 是你签的, 工程师是你掏钱养的, 这张保单是给你买的。",
+      reasonEn: "DAP · you sold to Heathrow, but you stay liable until cargo lands at LHR. The LD is in your name, the engineers are on your payroll — this policy is yours.",
+    },
+    scenarios: [
+      {
+        id: "A",
+        nameZh: "正常",
+        nameEn: "Normal",
+        probability: 0.30,
+        daysLate: 0,
+        lossUsd: 0,
+        payoutUsd: 0,
+        storyZh: "38 天到 Southampton + 内陆段顺到 Heathrow + 调试按计划 → T5 投产无 LD。零损失, 保费就是成本。",
+        storyEn: "38-day to Southampton + clean inland leg to Heathrow + on-schedule commissioning → T5 go-live with zero LD. Zero loss; premium is just cost.",
+      },
+      {
+        id: "B",
+        nameZh: "一半概率会落到这",
+        nameEn: "Coin-flip case",
+        probability: 0.40,
+        daysLate: 8,
+        lossUsd: 1_040_000,
+        payoutUsd: 1_040_000,
+        storyZh: "好望角航段遇风暴 + UK 海关常规抽查 → +8 天 → 你赔 $1.04M (含 8 天 LD + 40 工程师窝工)。保单全兜 (净 0)。",
+        storyEn: "Cape leg storm + UK customs random inspection → +8 days → you owe $1.04M (8 days LD + 40 idle engineers). Policy fully bails (net 0).",
+      },
+      {
+        id: "C",
+        nameZh: "够呛 · 1/5 的票",
+        nameEn: "Tail · 1-in-5",
+        probability: 0.20,
+        daysLate: 18,
+        lossUsd: 2_340_000,
+        payoutUsd: 2_000_000,
+        storyZh: "Trump 不访华 + UK 海关对中国电控设备升级审查 → 卡关 12 天 + 风暴 6 天 → 你赔 $2.34M, 保单兜 $2M, 自掏 $340K。",
+        storyEn: "Trump skips China visit → UK customs escalates Chinese-tech scrutiny → 12 days held + 6 days storm → you owe $2.34M. Policy bails $2M, you self-pay $340K.",
+      },
+      {
+        id: "D",
+        nameZh: "最坏 10%",
+        nameEn: "Worst 10%",
+        probability: 0.10,
+        daysLate: 38,
+        lossUsd: 4_940_000,
+        payoutUsd: 3_000_000,
+        storyZh: "Cape + 风暴 + 海关 + Heathrow 接驳延期 → +38 天 → T5 投产推迟到下季度 → 你赔 $4.94M, 保单封顶 $3M, 自扛 $1.94M。",
+        storyEn: "Cape storm + customs hold + Heathrow inland slot lost → +38 days → T5 go-live pushed a quarter → you owe $4.94M. Policy caps at $3M, you self-bear $1.94M.",
+      },
+    ],
     chokepointIds: ["CAPE", "BAB_EL_MANDEB", "SUEZ", "MALACCA"],
     factors: [
       {
