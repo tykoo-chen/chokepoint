@@ -2,33 +2,23 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>JUSTINCASE · A4 (English)</title>
+<title>JUSTINCASE · A4 (English · Plain Language)</title>
 <style>
   @page { size: A4; margin: 0; }
 
   :root {
-    --bg: #07090d;
-    --panel: #0e1218;
-    --line: #1a2230;
-    --amber: #ffb347;
-    --amber-dim: #b07b30;
-    --amber-bright: #ffc870;
-    --green: #7dffb1;
-    --red: #ff5a4a;
-    --text: #d6dde6;
-    --dim: #7b8896;
-    --faint: #4a5663;
+    --bg: #07090d; --panel: #0e1218; --line: #1a2230;
+    --amber: #ffb347; --amber-dim: #b07b30; --amber-bright: #ffc870;
+    --green: #7dffb1; --red: #ff5a4a;
+    --text: #d6dde6; --dim: #7b8896; --faint: #4a5663;
   }
 
   html, body { margin: 0; padding: 0; }
   body {
-    width: 210mm;
-    height: 297mm;
+    width: 210mm; height: 297mm;
     font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    background: var(--bg);
-    color: var(--text);
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    background: var(--bg); color: var(--text);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
     background-image:
       radial-gradient(circle at 50% -10%, rgba(255,179,71,0.10) 0%, transparent 40%),
       linear-gradient(rgba(255,179,71,0.025) 1px, transparent 1px),
@@ -36,10 +26,8 @@
     background-size: auto, 20px 20px, 20px 20px;
     overflow: hidden;
   }
-
   body::before {
-    content: "";
-    position: absolute; inset: 0;
+    content: ""; position: absolute; inset: 0;
     background: repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0 1px, transparent 1px 3px);
     pointer-events: none;
   }
@@ -49,52 +37,55 @@
   .corner-meta { display: flex; justify-content: space-between; font-size: 7pt; letter-spacing: 0.3em; color: var(--faint); margin-bottom: 8mm; }
   .corner-meta .dot { display: inline-block; width: 5px; height: 5px; background: var(--amber); border-radius: 50%; margin-right: 6px; }
 
-  .header { padding-bottom: 8mm; border-bottom: 1.5px solid var(--amber); }
+  .header { padding-bottom: 7mm; border-bottom: 1.5px solid var(--amber); }
   .wordmark { font-size: 38pt; line-height: 1; color: var(--amber); letter-spacing: 0.06em; font-weight: 700; }
   .wordmark .cn { color: var(--amber-bright); margin-left: 6mm; font-size: 0.55em; vertical-align: 0.2em; }
-  .tagline { font-size: 16pt; color: var(--text); margin-top: 4mm; line-height: 1.25; font-weight: 500; }
+  .tagline { font-size: 17pt; color: var(--text); margin-top: 4mm; line-height: 1.25; font-weight: 500; }
   .tagline .accent { color: var(--amber); }
-  .tagline-zh { font-size: 9pt; color: var(--dim); margin-top: 2mm; letter-spacing: 0.04em; }
+  .tagline-sub { font-size: 9pt; color: var(--dim); margin-top: 3mm; line-height: 1.4; }
 
-  .section { padding: 6mm 0; border-bottom: 1px solid var(--line); }
-  .section:last-child { border-bottom: none; }
+  .section { padding: 5mm 0; border-bottom: 1px solid var(--line); }
+  .section:last-of-type { border-bottom: none; }
   .section-kicker { font-size: 7.5pt; color: var(--amber); letter-spacing: 0.3em; margin-bottom: 3mm; }
   .section-title { font-size: 12pt; color: var(--text); line-height: 1.3; font-weight: 600; }
 
-  .gap-box { display: flex; gap: 4mm; padding: 5mm; background: rgba(255,90,74,0.07); border-left: 2.5mm solid var(--red); margin-top: 3mm; }
-  .gap-box .left { font-size: 14pt; color: var(--red); font-weight: 700; }
-  .gap-box .text { font-size: 9pt; line-height: 1.5; color: var(--text); }
-  .gap-box .text .strike { text-decoration: line-through; color: var(--faint); }
-  .gap-box .text .em { color: var(--amber); font-weight: 600; }
+  .gap-box {
+    display: flex; gap: 4mm; padding: 5mm;
+    background: rgba(255,90,74,0.07); border-left: 2.5mm solid var(--red);
+    margin-top: 3mm;
+  }
+  .gap-box .left { font-size: 14pt; color: var(--red); font-weight: 700; line-height: 1; }
+  .gap-box .text { font-size: 9pt; line-height: 1.6; color: var(--text); }
+  .gap-box .text .em { color: var(--amber); font-weight: 700; }
+  .gap-box .text .strike { color: var(--faint); }
 
   .steps { display: grid; grid-template-columns: 8mm 1fr; gap: 3mm 4mm; margin-top: 3mm; }
-  .step-num { font-size: 11pt; color: var(--amber); font-weight: 700; }
-  .step-en { font-size: 9.5pt; color: var(--text); font-weight: 600; line-height: 1.3; }
-  .step-detail { font-size: 7pt; color: var(--dim); margin-top: 1mm; line-height: 1.4; }
+  .step-num { font-size: 12pt; color: var(--amber); font-weight: 700; }
+  .step-headline { font-size: 10pt; color: var(--text); font-weight: 700; line-height: 1.3; }
+  .step-body { font-size: 8.5pt; color: var(--dim); margin-top: 1.5mm; line-height: 1.5; }
+  .step-body .em { color: var(--text); }
 
   .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-top: 3mm; }
   .stat { padding: 4mm; background: var(--panel); border: 1px solid var(--line); border-left: 2mm solid var(--amber); }
-  .stat .num { font-size: 22pt; color: var(--amber); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-  .stat .unit { font-size: 6.5pt; color: var(--amber-dim); letter-spacing: 0.25em; margin-top: 2mm; }
-  .stat .desc { font-size: 7pt; color: var(--dim); margin-top: 2mm; line-height: 1.4; }
+  .stat .num { font-size: 24pt; color: var(--amber); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat .unit { font-size: 7pt; color: var(--amber-dim); letter-spacing: 0.25em; margin-top: 2mm; }
+  .stat .desc { font-size: 8pt; color: var(--dim); margin-top: 2mm; line-height: 1.45; }
 
   .holder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; margin-top: 3mm; }
-  .holder { padding: 3.5mm; background: var(--panel); border: 1px solid var(--line); }
-  .holder .who { font-size: 6.5pt; color: var(--green); letter-spacing: 0.25em; margin-bottom: 1.5mm; }
+  .holder { padding: 4mm; background: var(--panel); border: 1px solid var(--line); }
+  .holder .who { font-size: 8pt; color: var(--green); font-weight: 700; margin-bottom: 1.5mm; }
   .holder .who.seller { color: var(--amber); }
-  .holder .body { font-size: 7.5pt; color: var(--text); line-height: 1.4; }
+  .holder .body { font-size: 8pt; color: var(--text); line-height: 1.5; }
   .holder .body .em { color: var(--amber); }
 
-  .feeds { display: flex; flex-wrap: wrap; gap: 2mm; margin-top: 3mm; }
-  .feed-tag { font-size: 6.5pt; color: var(--dim); border: 1px solid var(--line); padding: 1mm 2.5mm; letter-spacing: 0.1em; }
-  .feed-tag.real { color: var(--green); border-color: rgba(125,255,177,0.3); }
-
-  .footer { margin-top: auto; padding-top: 6mm; border-top: 1.5px solid var(--amber);
-    display: grid; grid-template-columns: 1fr 32mm; gap: 5mm; align-items: center; }
+  .footer {
+    margin-top: auto; padding-top: 5mm; border-top: 1.5px solid var(--amber);
+    display: grid; grid-template-columns: 1fr 30mm; gap: 5mm; align-items: center;
+  }
   .cta-kicker { font-size: 7pt; color: var(--amber); letter-spacing: 0.3em; }
   .cta-url { font-size: 13pt; color: var(--text); font-weight: 600; line-height: 1.1; margin-top: 1.5mm; word-break: break-all; }
   .cta-tag { font-size: 7pt; color: var(--amber-dim); margin-top: 2mm; }
-  .qr-box { width: 32mm; height: 32mm; background: white; padding: 1.5mm; box-sizing: border-box; }
+  .qr-box { width: 30mm; height: 30mm; background: white; padding: 1.5mm; box-sizing: border-box; }
   .qr-box img { width: 100%; height: 100%; display: block; }
 
   .corner { position: absolute; width: 6mm; height: 6mm; border: 0.5mm solid var(--amber); }
@@ -117,92 +108,106 @@
     <div class="header">
       <div class="wordmark">JUSTINCASE<span class="cn">万一</span></div>
       <div class="tagline">Your cargo's late — <span class="accent">we pay anyway.</span></div>
-      <div class="tagline-zh">参数化跨境延迟保障 · 由 Polymarket 实时定价</div>
+      <div class="tagline-sub">Ship's fine. Cargo's fine. It's just two weeks late. That loss, we cover.</div>
     </div>
 
     <div class="section">
-      <div class="section-kicker">/// 01 · THE GAP</div>
-      <div class="section-title">60% of cross-border trade pain is delay. Cargo cover only handles damage.</div>
+      <div class="section-kicker">/// THE PROBLEM YOU KNOW TOO WELL</div>
+      <div class="section-title">Ship didn't sink. Cargo's intact. You're still bleeding money.</div>
       <div class="gap-box">
         <div class="left">⚠</div>
         <div class="text">
-          ICC-A <span class="strike">explicitly excludes delay loss</span> —
-          ship didn't sink, cargo's intact, but you're 2 weeks late: missed promo window,
-          engineers idle on-site, customer-side LD penalties stack daily.
-          <span class="em">No one covers that gap. Until us.</span>
+          You missed your promo window. Your engineers are idle on payroll.
+          Your customer is billing you per day late — real money, gone from your books.<br/><br/>
+          And your <span class="strike">traditional cargo cover?</span>
+          <span class="em">Pays you nothing.</span> It only covers physical damage.
+          The cost of being late — nobody insures that. Until us.
         </div>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-kicker">/// 02 · HOW IT WORKS</div>
+      <div class="section-kicker">/// HOW IT WORKS</div>
       <div class="steps">
         <div class="step-num">①</div>
         <div>
-          <div class="step-en">Connect your enterprise Agent</div>
-          <div class="step-detail">Claude Code · Open Cloud · MCP server · ERP / contract-mgmt / project ledger / ops finance — direct read, no more PDF uploads</div>
+          <div class="step-headline">Plug us into your stack.</div>
+          <div class="step-body">
+            <span class="em">Orders, contracts, schedules, finance models</span> — we read them directly.
+            No PDF uploads. Your in-house AI assistant just hands us the data.
+          </div>
         </div>
         <div class="step-num">②</div>
         <div>
-          <div class="step-en">AI decomposes 4-5 independent risk vectors</div>
-          <div class="step-detail">Claude Opus 4.7 + Sonnet 4.6 · STRAITS · WEATHER · COMMODITY PRICE · POLICY · MACRO — 5 independent bet bases per voyage</div>
+          <div class="step-headline">AI lists every way this voyage can break.</div>
+          <div class="step-body">
+            Is the Red Sea blocked? Will Atlantic storms come early? Did oil spike? Did the BoE hike? —
+            <span class="em">your single shipment is exposed to 4 or 5 independent risks at once.</span>
+          </div>
         </div>
         <div class="step-num">③</div>
         <div>
-          <div class="step-en">Real-time Polymarket pricing</div>
-          <div class="step-detail">Each risk vector ties to a real prediction market contract · price = market price, not actuarial guess</div>
+          <div class="step-headline">Each risk maps to a real betting market.</div>
+          <div class="step-body">
+            Somewhere on the planet, real money is wagering "Red Sea stays closed through May".
+            <span class="em">We use the market price as your premium</span> — not actuarial guesswork.
+            Live, transparent, fair.
+          </div>
         </div>
         <div class="step-num">④</div>
         <div>
-          <div class="step-en">One-click bind + automated hedge split</div>
-          <div class="step-detail">Premium routes across Polymarket / reinsurance / derivatives · trigger from AIS + port-arrival timestamps · 72h payout</div>
+          <div class="step-headline">One click to bind. 72 hours to payout.</div>
+          <div class="step-body">
+            If things go wrong — <span class="em">satellites track your ship</span>, port logs confirm arrival,
+            the system decides. No adjuster, no paperwork. Money lands in your account.
+          </div>
         </div>
-      </div>
-      <div class="feeds">
-        <span class="feed-tag real">● POLYMARKET · LIVE</span>
-        <span class="feed-tag">AIS · SPIRE</span>
-        <span class="feed-tag">IMF PORTWATCH</span>
-        <span class="feed-tag">KALSHI</span>
-        <span class="feed-tag">LLOYD'S LIST</span>
-        <span class="feed-tag">BALTIC EXCHANGE</span>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-kicker">/// 03 · NUMBERS</div>
+      <div class="section-kicker">/// THE NUMBERS THAT MATTER</div>
       <div class="stats">
         <div class="stat">
-          <div class="num">20s</div>
-          <div class="unit">B/L → POLICY</div>
-          <div class="desc">Fully automated. Industry baseline: 7 weeks.</div>
+          <div class="num">20 sec</div>
+          <div class="unit">DATA → POLICY</div>
+          <div class="desc">Fully automated. The industry today: 7 weeks.</div>
         </div>
         <div class="stat">
-          <div class="num">72h</div>
+          <div class="num">72 hr</div>
           <div class="unit">TRIGGER → PAYOUT</div>
-          <div class="desc">Smart contract releases funds. No adjuster, no haggling.</div>
+          <div class="desc">No adjuster. No paperwork. Just funds in your account.</div>
         </div>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-kicker">/// 04 · WHO IT'S FOR</div>
+      <div class="section-kicker">/// WHO IT'S FOR</div>
       <div class="holder-grid">
         <div class="holder">
-          <div class="who">BUYER HOLDS · CFR/CIF/FOB · ~75%+ of global trade</div>
-          <div class="body">Importers · trading desks · channel distributors — anyone who signed an <span class="em">"$X per day late"</span> LD clause.</div>
+          <div class="who">▸ The buyer side</div>
+          <div class="body">
+            Importers, traders, retail channels.<br/>
+            If your contract has a <span class="em">"$X per day late"</span> clause —
+            this policy is yours. (Most cross-border trade.)
+          </div>
         </div>
         <div class="holder">
-          <div class="who seller">SELLER HOLDS · DAP/DDP · project deployment</div>
-          <div class="body">EPCs · system integrators · equipment exporters — anyone who pinned a <span class="em">go-live date</span> into the contract.</div>
+          <div class="who seller">▸ Project deployers</div>
+          <div class="body">
+            Equipment exporters, EPCs, system integrators.<br/>
+            If your contract pins a <span class="em">go-live date</span> —
+            and late means real money — this is yours.
+          </div>
         </div>
       </div>
     </div>
 
     <div class="footer">
       <div>
-        <div class="cta-kicker">/// LIVE DEMO · scan to try</div>
+        <div class="cta-kicker">/// TRY IT NOW · scan to open</div>
         <div class="cta-url">chokepoint-nine.vercel.app</div>
-        <div class="cta-tag">#AttraX Spring-tide Hackathon · 2026.04 · github.com/tykoo-chen/chokepoint</div>
+        <div class="cta-tag">#AttraX Spring-Tide Hackathon · github.com/tykoo-chen/chokepoint</div>
       </div>
       <div class="qr-box">
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=8&data=https://chokepoint-nine.vercel.app" alt="QR" />

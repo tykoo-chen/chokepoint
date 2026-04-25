@@ -2,35 +2,23 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8" />
-<title>JUSTINCASE · 万一 · 易拉宝 200×80cm</title>
+<title>JUSTINCASE · 万一 · 易拉宝 200×80cm (人话版)</title>
 <style>
-  /* Print to PDF: Chrome → Cmd+P → Save as PDF.
-     The @page rule sets the physical size so the PDF is exactly 80cm × 200cm. */
   @page { size: 80cm 200cm; margin: 0; }
 
   :root {
-    --bg: #07090d;
-    --panel: #0e1218;
-    --line: #1a2230;
-    --amber: #ffb347;
-    --amber-dim: #b07b30;
-    --amber-bright: #ffc870;
-    --green: #7dffb1;
-    --red: #ff5a4a;
-    --text: #d6dde6;
-    --dim: #7b8896;
-    --faint: #4a5663;
+    --bg: #07090d; --panel: #0e1218; --line: #1a2230;
+    --amber: #ffb347; --amber-dim: #b07b30; --amber-bright: #ffc870;
+    --green: #7dffb1; --red: #ff5a4a;
+    --text: #d6dde6; --dim: #7b8896; --faint: #4a5663;
   }
 
   html, body { margin: 0; padding: 0; }
   body {
-    width: 80cm;
-    height: 200cm;
+    width: 80cm; height: 200cm;
     font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
-    background: var(--bg);
-    color: var(--text);
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    background: var(--bg); color: var(--text);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
     background-image:
       radial-gradient(circle at 50% 0%, rgba(255,179,71,0.10) 0%, transparent 35%),
       radial-gradient(circle at 50% 100%, rgba(125,255,177,0.05) 0%, transparent 30%),
@@ -38,26 +26,16 @@
       linear-gradient(90deg, rgba(255,179,71,0.025) 1px, transparent 1px);
     background-size: auto, auto, 40px 40px, 40px 40px;
   }
-
-  /* Scanlines accent */
   body::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg, rgba(255,255,255,0.018) 0, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 4px
-    );
+    content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 4px);
     pointer-events: none;
   }
 
   .frame {
-    position: absolute;
-    inset: 4cm;
-    width: calc(80cm - 8cm);
-    height: calc(200cm - 8cm);
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
+    position: absolute; inset: 4cm;
+    width: calc(80cm - 8cm); height: calc(200cm - 8cm);
+    display: flex; flex-direction: column; box-sizing: border-box;
   }
 
   /* HEADER */
@@ -66,60 +44,54 @@
   .corner-meta .dot { display: inline-block; width: 0.5cm; height: 0.5cm; background: var(--amber); border-radius: 50%; margin-right: 0.5cm; vertical-align: middle; }
   .wordmark { font-size: 9.5cm; line-height: 1; color: var(--amber); letter-spacing: 0.06em; font-weight: 700; }
   .wordmark .cn { color: var(--amber-bright); margin-left: 0.8cm; font-size: 0.55em; vertical-align: 0.2em; }
-  .tagline { font-size: 3.4cm; color: var(--text); line-height: 1.15; margin-top: 2cm; font-weight: 500; }
+  .tagline { font-size: 3.6cm; color: var(--text); line-height: 1.15; margin-top: 2cm; font-weight: 600; }
   .tagline .accent { color: var(--amber); }
-  .tagline-en { font-size: 1.4cm; color: var(--dim); margin-top: 1cm; letter-spacing: 0.04em; }
+  .tagline-sub { font-size: 1.4cm; color: var(--dim); margin-top: 1.2cm; line-height: 1.4; }
 
   /* SECTION */
-  .section { padding: 2.5cm 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; }
-  .section-kicker { font-size: 1.05cm; color: var(--amber); letter-spacing: 0.4em; margin-bottom: 1.2cm; }
-  .section-title { font-size: 2.4cm; line-height: 1.15; color: var(--text); margin-bottom: 1cm; font-weight: 600; }
-  .section-en { font-size: 1.1cm; color: var(--dim); letter-spacing: 0.04em; line-height: 1.3; }
+  .section { padding: 2.4cm 0; border-bottom: 1px solid var(--line); }
+  .section:last-of-type { border-bottom: none; }
+  .section-kicker { font-size: 1cm; color: var(--amber); letter-spacing: 0.4em; margin-bottom: 1.2cm; }
+  .section-title { font-size: 2.6cm; line-height: 1.15; color: var(--text); margin-bottom: 1cm; font-weight: 700; }
 
   /* THE GAP */
-  .gap-box { display: flex; gap: 1.2cm; align-items: flex-start; padding: 1.6cm; background: rgba(255,90,74,0.06); border-left: 0.3cm solid var(--red); margin-top: 1cm; }
-  .gap-box .left { font-size: 2.2cm; color: var(--red); font-weight: 700; line-height: 1; }
-  .gap-box .text { font-size: 1.4cm; color: var(--text); line-height: 1.45; }
-  .gap-box .text .strike { text-decoration: line-through; color: var(--faint); }
+  .gap-box { display: flex; gap: 1.4cm; align-items: flex-start; padding: 1.8cm; background: rgba(255,90,74,0.06); border-left: 0.3cm solid var(--red); margin-top: 1cm; }
+  .gap-box .left { font-size: 2.6cm; color: var(--red); font-weight: 700; line-height: 1; }
+  .gap-box .text { font-size: 1.4cm; color: var(--text); line-height: 1.55; }
   .gap-box .text .em { color: var(--amber); font-weight: 700; }
+  .gap-box .text .strike { color: var(--faint); }
 
   /* STEPS */
-  .steps { display: grid; grid-template-columns: 1.6cm 1fr; gap: 1cm 1.4cm; margin-top: 1.2cm; }
+  .steps { display: grid; grid-template-columns: 1.6cm 1fr; gap: 1.4cm 1.4cm; margin-top: 1.4cm; }
   .step-num { font-size: 2.2cm; color: var(--amber); font-weight: 700; line-height: 1; }
   .step-body { padding-bottom: 1.5cm; }
-  .step-zh { font-size: 1.7cm; color: var(--text); line-height: 1.25; font-weight: 600; }
-  .step-en { font-size: 0.95cm; color: var(--dim); margin-top: 0.5cm; line-height: 1.4; letter-spacing: 0.02em; }
+  .step-headline { font-size: 1.7cm; color: var(--text); line-height: 1.25; font-weight: 700; }
+  .step-detail { font-size: 1cm; color: var(--dim); margin-top: 0.6cm; line-height: 1.5; }
+  .step-detail .em { color: var(--text); font-weight: 600; }
 
   /* STATS */
   .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5cm; margin-top: 1.2cm; }
   .stat { padding: 1.8cm; background: var(--panel); border: 1px solid var(--line); border-left: 0.25cm solid var(--amber); }
   .stat .num { font-size: 5.5cm; color: var(--amber); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
   .stat .unit { font-size: 1cm; color: var(--amber-dim); letter-spacing: 0.3em; margin-top: 0.7cm; }
-  .stat .desc { font-size: 0.85cm; color: var(--dim); margin-top: 0.7cm; line-height: 1.4; }
-
-  /* DATA SOURCES */
-  .feeds { display: flex; flex-wrap: wrap; gap: 0.7cm; margin-top: 1.5cm; }
-  .feed-tag { font-size: 0.85cm; color: var(--dim); border: 1px solid var(--line); padding: 0.45cm 0.95cm; letter-spacing: 0.1em; }
-  .feed-tag.real { color: var(--green); border-color: rgba(125,255,177,0.3); }
+  .stat .desc { font-size: 0.95cm; color: var(--dim); margin-top: 0.7cm; line-height: 1.45; }
 
   /* WHO BUYS */
   .holder-grid { display: grid; grid-template-columns: 1fr; gap: 1cm; margin-top: 1.2cm; }
   .holder-row { padding: 1.4cm; background: var(--panel); border: 1px solid var(--line); }
-  .holder-row .who { font-size: 0.95cm; color: var(--green); letter-spacing: 0.3em; margin-bottom: 0.6cm; }
+  .holder-row .who { font-size: 1.2cm; color: var(--green); font-weight: 700; margin-bottom: 0.5cm; }
   .holder-row .who.seller { color: var(--amber); }
   .holder-row .body { font-size: 1.3cm; color: var(--text); line-height: 1.4; }
   .holder-row .body .em { color: var(--amber); font-weight: 700; }
 
-  /* FOOTER / CTA */
-  .footer { margin-top: 2cm; padding-top: 2.5cm; border-top: 0.15cm solid var(--amber); display: grid; grid-template-columns: 1fr 14cm; gap: 1.5cm; align-items: center; }
-  .cta-block { display: flex; flex-direction: column; gap: 0.7cm; }
+  /* FOOTER */
+  .footer { margin-top: auto; padding-top: 2.5cm; border-top: 0.15cm solid var(--amber); display: grid; grid-template-columns: 1fr 14cm; gap: 1.5cm; align-items: center; }
   .cta-kicker { font-size: 1cm; color: var(--amber); letter-spacing: 0.4em; }
-  .cta-url { font-size: 2cm; color: var(--text); font-weight: 600; line-height: 1.1; word-break: break-all; }
-  .cta-tag { font-size: 1.1cm; color: var(--amber-dim); letter-spacing: 0.05em; margin-top: 0.6cm; }
+  .cta-url { font-size: 2.2cm; color: var(--text); font-weight: 700; line-height: 1.1; word-break: break-all; margin-top: 0.6cm; }
+  .cta-tag { font-size: 1.05cm; color: var(--amber-dim); letter-spacing: 0.05em; margin-top: 0.6cm; }
   .qr-box { width: 14cm; height: 14cm; background: white; padding: 0.6cm; box-sizing: border-box; }
   .qr-box img { width: 100%; height: 100%; display: block; }
 
-  /* hairline corner marks */
   .corner { position: absolute; width: 1cm; height: 1cm; border: 0.08cm solid var(--amber); }
   .corner.tl { top: 1.5cm; left: 1.5cm; border-right: none; border-bottom: none; }
   .corner.tr { top: 1.5cm; right: 1.5cm; border-left: none; border-bottom: none; }
@@ -128,134 +100,117 @@
 </style>
 </head>
 <body>
-  <span class="corner tl"></span>
-  <span class="corner tr"></span>
-  <span class="corner bl"></span>
-  <span class="corner br"></span>
+  <span class="corner tl"></span><span class="corner tr"></span>
+  <span class="corner bl"></span><span class="corner br"></span>
 
   <div class="frame">
-    <!-- HEADER -->
     <div class="header">
       <div class="corner-meta">
         <span><span class="dot"></span>JUSTINCASE · v0.1 · DEMO</span>
         <span>2026 · #ATTRAX 春潮 SPRING 黑客松</span>
       </div>
       <div class="wordmark">JUSTINCASE<span class="cn">万一</span></div>
-      <div class="tagline">
-        货晚了, <span class="accent">我们照赔。</span>
-      </div>
-      <div class="tagline-en">Your cargo's late — we pay anyway.</div>
+      <div class="tagline">货晚了, <span class="accent">我们照赔。</span></div>
+      <div class="tagline-sub">船没坏, 货也没坏 — 就是晚到了。这种损失, 我们赔。</div>
     </div>
 
-    <!-- THE GAP -->
     <div class="section">
-      <div class="section-kicker">/// 01 · 真问题 · THE GAP</div>
-      <div class="section-title">
-        全球贸易里 60% 的痛, 是延误。<br />
-        但传统货运险, 只赔货损。
-      </div>
+      <div class="section-kicker">/// 你头疼的那件事</div>
+      <div class="section-title">船没沉, 货还在 —<br/>但你晚了两周。</div>
       <div class="gap-box">
         <div class="left">⚠</div>
         <div class="text">
-          ICC-A 条款<span class="strike">明文排除 delay loss</span> —
-          船没沉、货也没坏, 可你晚到两周, 错过促销窗 / 工程师空等 / 客户按天罚款。
-          <strong style="color:var(--amber);">这块, 没人保。</strong>
+          促销错过了。工程师在工地上等着发工资。客户按天罚你款 —
+          这些钱真真实实从你账上消失了。<br/><br/>
+          可你的<span class="strike">传统货运险</span>?
+          <span class="em">一分不赔。</span>
+          它只管"货物物理损坏"。<br/><br/>
+          晚到的损失, 一直没人保。<span class="em">直到我们。</span>
         </div>
       </div>
     </div>
 
-    <!-- HOW IT WORKS -->
-    <div class="section" style="flex: 1;">
-      <div class="section-kicker">/// 02 · 我们怎么做 · HOW IT WORKS</div>
+    <div class="section">
+      <div class="section-kicker">/// 我们怎么帮你</div>
       <div class="steps">
         <div class="step-num">①</div>
         <div class="step-body">
-          <div class="step-zh">接你企业的 Agent</div>
-          <div class="step-en">
-            Claude Code · Open Cloud · MCP server · ERP / 合同 / 项目台账 / ops 模型 — 直接读, 不再让你一份份上传 PDF
+          <div class="step-headline">把你的系统接进来。</div>
+          <div class="step-detail">
+            <span class="em">订单 · 合同 · 排期 · 财务模型</span> — 我们直接读, 不用你一份份上传 PDF。
+            你公司里那个 AI 助手把信息直接交给我们。
           </div>
         </div>
 
         <div class="step-num">②</div>
         <div class="step-body">
-          <div class="step-zh">AI 拆出 4-5 维独立风险</div>
-          <div class="step-en">
-            Claude Opus 4.7 + Sonnet 4.6 解析路线 / 货品 / 货值 / LD ·
-            自动定位海峡 · 天气 · 原料价 · 政策 · 宏观 — 5 个独立"赌注基础"
+          <div class="step-headline">AI 把这一票货能踩的坑都列出来。</div>
+          <div class="step-detail">
+            红海封不封？大西洋会不会提前来风暴？油价飙没飙？英国会不会加息？—
+            <span class="em">你这一票, 同时挂着 4 到 5 个独立风险。</span>
           </div>
         </div>
 
         <div class="step-num">③</div>
         <div class="step-body">
-          <div class="step-zh">Polymarket 实时定价</div>
-          <div class="step-en">
-            每个风险维度, 都对应一个真实存在的预测市场合约 ·
-            报价 = 市场价, 不是精算师拍脑袋
+          <div class="step-headline">每个风险, 对应一个真实押注市场。</div>
+          <div class="step-detail">
+            全世界有人花真钱押 "红海会封到 5 月底"。<br/>
+            <span class="em">我们直接看市场价 — 不是精算师拍脑袋。</span>
+            报价 = 市场报价。透明、公正、随时变。
           </div>
         </div>
 
         <div class="step-num">④</div>
         <div class="step-body">
-          <div class="step-zh">一键投保 + 拆单对冲</div>
-          <div class="step-en">
-            保费自动分到 Polymarket / 再保险 / 衍生品 ·
-            出事按 AIS + 港到港时间戳, 72 小时打款 — 不和理赔员扯皮
+          <div class="step-headline">点一下投保。出事 72 小时打款。</div>
+          <div class="step-detail">
+            真出事了 — <span class="em">卫星看你船在哪</span>, 港口数据看到没到, 系统自动判断。
+            不用扯皮, 不写理赔单, 钱直接到账。
           </div>
         </div>
       </div>
-
-      <div class="feeds">
-        <span class="feed-tag real">● POLYMARKET GAMMA · 实时</span>
-        <span class="feed-tag">AIS · SPIRE</span>
-        <span class="feed-tag">IMF PORTWATCH</span>
-        <span class="feed-tag">KALSHI</span>
-        <span class="feed-tag">LLOYD'S LIST</span>
-        <span class="feed-tag">BALTIC EXCHANGE</span>
-      </div>
     </div>
 
-    <!-- STATS -->
     <div class="section">
-      <div class="section-kicker">/// 03 · 关键数字 · NUMBERS</div>
+      <div class="section-kicker">/// 关键数字</div>
       <div class="stats">
         <div class="stat">
-          <div class="num">20s</div>
-          <div class="unit">从提单到保单</div>
-          <div class="desc">B/L → 报价 · 全自动 · 同行 7 周流程</div>
+          <div class="num">20 秒</div>
+          <div class="unit">从数据到保单</div>
+          <div class="desc">全自动。同行业现在做这件事要 7 周。</div>
         </div>
         <div class="stat">
-          <div class="num">72h</div>
-          <div class="unit">从触发到到账</div>
-          <div class="desc">触发器响 → 智能合约赔付 · 不见理赔员</div>
+          <div class="num">72 小时</div>
+          <div class="unit">出事到打款</div>
+          <div class="desc">不见理赔员, 不写理赔单。<br/>系统自动判断, 直接到账。</div>
         </div>
       </div>
     </div>
 
-    <!-- WHO BUYS -->
     <div class="section">
-      <div class="section-kicker">/// 04 · 谁买 · WHO IT'S FOR</div>
+      <div class="section-kicker">/// 谁会用</div>
       <div class="holder-grid">
         <div class="holder-row">
-          <div class="who">买方持有 · BUYER (CFR / FOB / CIF · 75%+ 跨境贸易)</div>
+          <div class="who">▸ 买方 · 进货的一方 (大部分跨境贸易)</div>
           <div class="body">
-            进口商 · 大宗交易台 · 渠道分销 · 制造业采购 — 凡是在
-            <span class="em">"晚一天 = $X"</span> 这条 LD 里签过名的, 都在这。
+            进口商 · 贸易公司 · 渠道分销 · 制造业采购 —
+            合同里签过 <span class="em">"晚一天罚 X 元"</span> 这条款的, 都需要这张保单。
           </div>
         </div>
         <div class="holder-row">
-          <div class="who seller">卖方持有 · SELLER (DAP / DDP · 项目类)</div>
+          <div class="who seller">▸ 卖方 · 做项目交付 (设备 / 整厂 / 调试)</div>
           <div class="body">
-            EPC · 系统集成商 · 设备出口 — 给 Heathrow / 电站 / 整厂搬迁交付的, 把
-            <span class="em">go-live 日期</span>钉死在合同里的那批。
+            机场设备 · 整厂搬迁 · 电站调试 · 系统集成 —
+            把 <span class="em">投产日期</span> 钉死在合同里, 晚一天就要赔的那批人。
           </div>
         </div>
       </div>
     </div>
 
-    <!-- FOOTER -->
     <div class="footer">
-      <div class="cta-block">
-        <div class="cta-kicker">/// LIVE DEMO · 扫码立即体验</div>
+      <div>
+        <div class="cta-kicker">/// 现在就试 · 扫码进 demo</div>
         <div class="cta-url">chokepoint-nine.vercel.app</div>
         <div class="cta-tag">#AttraX 春潮 Spring 黑客松 · 2026.04</div>
       </div>
