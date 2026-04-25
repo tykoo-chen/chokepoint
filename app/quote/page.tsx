@@ -5,6 +5,7 @@ import FactorDecomposition from "@/app/components/FactorDecomposition";
 import HedgeWaterfall from "@/app/components/HedgeWaterfall";
 import InsureButton from "@/app/components/InsureButton";
 import PlainLanguage from "@/app/components/PlainLanguage";
+import ScenarioPanel from "@/app/components/ScenarioPanel";
 import Ticker from "@/app/components/Ticker";
 import TopBar from "@/app/components/TopBar";
 import { caseById, chokepointsFor, L } from "@/app/lib/cases";
@@ -82,6 +83,10 @@ function QuoteInner() {
           </div>
 
           <PlainLanguage case_={case_} risk={risk} />
+
+          {case_.scenarios && case_.scenarios.length > 0 && (
+            <ScenarioPanel case_={case_} />
+          )}
 
           {case_.factors && case_.factors.length > 0 && (
             <FactorDecomposition case_={case_} chokepoints={chokepoints} />

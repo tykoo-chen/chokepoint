@@ -17,6 +17,23 @@ export default function PlainLanguage({ case_, risk }: { case_: Case; risk: Risk
   const penaltyNote = L(case_.penaltySourceNoteZh, case_.penaltySourceNoteEn, lang);
   const cargoShort = cargo.split("·")[0].replace(/\(.*\)/, "").trim();
   const buyerShort = buyer ? buyer.split("·")[0].trim() : "";
+  // Prefer the resolved policy-holder name (it's the party we're speaking to as "you")
+  const ph = case_.policyHolder;
+  const holderName = ph?.partyName ?? buyerShort;
+  // Loss/d shown to buyer = the internal real loss when present (this is what they actually book), else fall back to contract LD
+  const lossPerDay = case_.internalLossPerDayUsd ?? case_.contractPenaltyPerDayUsd;
+  const lossSource =
+    case_.internalLossPerDayUsd !== undefined
+      ? lang === "zh"
+        ? "内部 ops 模型"
+        : "from your ops model"
+      : case_.penaltySource === "estimate"
+        ? lang === "zh"
+          ? "估算"
+          : "estimate"
+        : lang === "zh"
+          ? "合同"
+          : "from contract";
 
   return (
     <div className="panel-raised p-5 border-amber-dim bg-panel-2/40">
@@ -31,44 +48,35 @@ export default function PlainLanguage({ case_, risk }: { case_: Case; risk: Risk
 
       {lang === "zh" ? (
         <p className="text-[13px] text-text leading-relaxed">
+          {holderName ? (
+            <>
+              <span className="text-amber">{holderName}</span> ·{" "}
+            </>
+          ) : null}
           你这票 <span className="text-amber">{fmtMoneyLong(case_.cargoValueUsd, ccy)}</span> 的{" "}
           {cargoShort}, 原计划 {case_.baselineTransitDays} 天从{" "}
           <span className="text-dim">{case_.origin.name}</span> 到{" "}
           <span className="text-dim">{case_.destination.name}</span>。
-          {buyerShort ? (
-            <>
-              买方 <span className="text-dim">{buyerShort}</span>{" "}
-            </>
-          ) : null}
-          只有 <span className="text-amber">{case_.bufferDays} 天</span>缓冲, 晚一天罚{" "}
-          <span className="text-amber">{fmtMoney(case_.contractPenaltyPerDayUsd, ccy)}</span>
-          {case_.penaltySource === "estimate" ? (
-            <span className="text-[10px] text-amber-dim ml-1">(估算)</span>
-          ) : case_.penaltySource === "contract" ? (
-            <span className="text-[10px] text-green ml-1">(合同)</span>
-          ) : null}
+          只有 <span className="text-amber">{case_.bufferDays} 天</span>缓冲, 晚一天你赔{" "}
+          <span className="text-amber">{fmtMoney(lossPerDay, ccy)}</span>
+          <span className="text-[10px] text-amber-dim ml-1">({lossSource})</span>
           。
         </p>
       ) : (
         <p className="text-[13px] text-text leading-relaxed">
-          Your <span className="text-amber">{fmtMoneyLong(case_.cargoValueUsd, ccy)}</span> shipment
+          {holderName ? (
+            <>
+              <span className="text-amber">{holderName}</span> ·{" "}
+            </>
+          ) : null}
+          your <span className="text-amber">{fmtMoneyLong(case_.cargoValueUsd, ccy)}</span> shipment
           of {cargoShort}, originally {case_.baselineTransitDays} days from{" "}
           <span className="text-dim">{case_.origin.name}</span> to{" "}
           <span className="text-dim">{case_.destination.name}</span>.
-          {buyerShort ? (
-            <>
-              {" "}
-              Buyer <span className="text-dim">{buyerShort}</span>
-            </>
-          ) : null}
-          {" "}has only <span className="text-amber">{case_.bufferDays} days</span> of buffer; each day
-          late costs{" "}
-          <span className="text-amber">{fmtMoney(case_.contractPenaltyPerDayUsd, ccy)}</span>
-          {case_.penaltySource === "estimate" ? (
-            <span className="text-[10px] text-amber-dim ml-1">(estimate)</span>
-          ) : case_.penaltySource === "contract" ? (
-            <span className="text-[10px] text-green ml-1">(from contract)</span>
-          ) : null}
+          {" "}You have only <span className="text-amber">{case_.bufferDays} days</span> of buffer;
+          each day late costs you{" "}
+          <span className="text-amber">{fmtMoney(lossPerDay, ccy)}</span>
+          <span className="text-[10px] text-amber-dim ml-1">({lossSource})</span>
           .
         </p>
       )}
