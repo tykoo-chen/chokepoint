@@ -114,7 +114,7 @@ function QuoteInner() {
 
         <aside className="col-span-12 lg:col-span-4 flex flex-col gap-4">
           <InsureButton risk={risk} caseId={case_.id} currency={case_.currency} />
-          <HedgeWaterfall risk={risk} currency={case_.currency} />
+          <HedgeWaterfall risk={risk} currency={case_.currency} case_={case_} />
           <div className="panel-raised p-4 text-[11px] text-dim leading-relaxed">
             <div className="label-kicker mb-2">
               /// {t("为什么需要这张保单", "WHY THIS POLICY")}
