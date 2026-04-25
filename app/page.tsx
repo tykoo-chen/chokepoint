@@ -1,64 +1,85 @@
-import Image from "next/image";
+import CaseCard from "./components/CaseCard";
+import TopBar from "./components/TopBar";
+import Ticker from "./components/Ticker";
+import UploadBox from "./components/UploadBox";
+import { CASES } from "./lib/cases";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="relative z-10 min-h-screen flex flex-col">
+      <TopBar screen="录入 · INTAKE" threat={7} />
+      <Ticker />
+
+      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-10 flex flex-col gap-8">
+        <section className="flex flex-col gap-3 pt-4">
+          <div className="label-kicker">/// 给跨境进口商 / 项目部署商的参数化延迟保障</div>
+          <h1 className="text-3xl md:text-4xl leading-tight">
+            你的货没坏, 但晚了两周 —
+            <br />
+            <span className="text-amber">
+              促销窗口错过了 / 项目现场 40 位工程师空等 / 客户按天罚款。
+            </span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-dim text-sm max-w-2xl leading-relaxed">
+            传统货运险(ICC-A)<span className="text-amber">明文排除 delay loss</span> ——
+            船没沉、货也没坏, 晚到造成的生意损失它不赔。
+            上传提单, AI 读航线, 匹配活跃海峡/天气/政治风险,
+            拉 Polymarket · Kalshi · AIS 实时信号, 20 秒给出一张"晚几天赔多少"的参数化保单。
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          <div className="mt-2 flex flex-wrap gap-2 text-[10px] text-faint tracking-widest">
+            <span className="px-2 py-0.5 border border-line">AIS · Spire</span>
+            <span className="px-2 py-0.5 border border-line">IMF PortWatch</span>
+            <span className="px-2 py-0.5 border border-line">Polymarket Gamma API</span>
+            <span className="px-2 py-0.5 border border-line">Kalshi</span>
+            <span className="px-2 py-0.5 border border-line">Lloyd&apos;s List</span>
+            <span className="px-2 py-0.5 border border-line">Baltic Exchange FFA</span>
+            <span className="px-2 py-0.5 border border-amber-dim text-amber-dim">DEMO · 模拟数据</span>
+          </div>
+        </section>
+
+        <section>
+          <UploadBox />
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <div className="flex items-baseline justify-between">
+            <div className="label-kicker">/// 三个 LEC 风格示例 · 2026 年 4 月真实背景</div>
+            <div className="text-[10px] text-faint tracking-widest">
+              <span className="text-amber">#01</span> 霍尔木兹 · 当下最硬约束
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {CASES.map((c, i) => (
+              <CaseCard key={c.id} c={c} index={i} />
+            ))}
+          </div>
+        </section>
+
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+          <div className="panel p-4">
+            <div className="label-kicker mb-2">01 · AI 风险 Copilot</div>
+            <div className="text-sm text-dim leading-relaxed">
+              读取提单/合同, 识别航线、货值、交期, 匹配活跃 chokepoint, 拟合损失分布。
+            </div>
+          </div>
+          <div className="panel p-4">
+            <div className="label-kicker mb-2">02 · 参数化赔付</div>
+            <div className="text-sm text-dim leading-relaxed">
+              AIS 船位 + 到港数据 + 市场信号多源交叉触发, 不看定损单, 72 小时到账。
+            </div>
+          </div>
+          <div className="panel p-4">
+            <div className="label-kicker mb-2">03 · 自动对冲引擎</div>
+            <div className="text-sm text-dim leading-relaxed">
+              保费拆单, 分别下到 Polymarket / Kalshi / FFA / 再保险, 自动建仓。
+            </div>
+          </div>
+        </section>
+
+        <footer className="pt-6 pb-8 border-t border-line text-[10px] text-faint tracking-widest flex items-center justify-between">
+          <div>CHOKEPOINT · 参数化航运延迟保障 · DEMO MODE · 模拟数据</div>
+          <div>BUILT FOR TRACK 3 · GLOBAL PRODUCTS</div>
+        </footer>
       </main>
     </div>
   );
