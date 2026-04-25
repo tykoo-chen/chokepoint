@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CHOKEPOINTS, type Chokepoint, type Factor } from "./cases";
+import { CASES, CHOKEPOINTS, type Chokepoint, type Factor } from "./cases";
 
 export type LiveProbability = {
   slug: string;
@@ -115,9 +115,30 @@ export function useLiveChokepoints(base: Chokepoint[]): {
 // Stable base for global ticker
 const TICKER_BASE: Chokepoint[] = Object.values(CHOKEPOINTS);
 
+/** All unique factors across every case, deduplicated by polymarketSlug. */
+function gatherAllFactors(): Factor[] {
+  const seen = new Set<string>();
+  const out: Factor[] = [];
+  for (const c of CASES) {
+    for (const f of c.factors ?? []) {
+      if (seen.has(f.polymarketSlug)) continue;
+      seen.add(f.polymarketSlug);
+      out.push(f);
+    }
+  }
+  return out;
+}
+const TICKER_FACTORS: Factor[] = gatherAllFactors();
+
 export function useLiveTicker() {
-  const hook = useLiveChokepoints(TICKER_BASE);
-  return { chokepoints: hook.chokepoints, live: hook.live, loading: hook.loading };
+  const cp = useLiveChokepoints(TICKER_BASE);
+  const fa = useLiveFactors(TICKER_FACTORS);
+  return {
+    chokepoints: cp.chokepoints,
+    factors: fa.factors,
+    live: { ...cp.live, ...fa.live },
+    loading: cp.loading || fa.loading,
+  };
 }
 
 /** Live hydration for factor-level markets (weather/price/policy/macro). */

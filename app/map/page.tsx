@@ -189,7 +189,7 @@ function MapInner() {
         </section>
 
         <aside className="col-span-12 lg:col-span-3 flex flex-col gap-4">
-          <ChokepointPanel chokepoints={chokepoints} />
+          <ChokepointPanel chokepoints={chokepoints} factors={case_.factors} />
           <div className="panel-raised p-4">
             <div className="label-kicker mb-2">/// {t("风险敞口一览", "RISK EXPOSURE")}</div>
             <div className="text-[11px] space-y-2">
