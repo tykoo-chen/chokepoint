@@ -100,7 +100,7 @@ export default function LiveMarketsAccordion({
               ▣ {t("海峡 / 通道", "STRAITS / CANALS")} · {chokepoints.length}
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-px bg-line">
+          <div className="flex flex-wrap gap-px bg-line">
             {chokepoints.map((c) => (
               <ChokepointCard
                 key={c.id}
@@ -120,7 +120,7 @@ export default function LiveMarketsAccordion({
                   ✦ {t("其他风险因子 · 天气 / 原料 / 政策 / 宏观", "OTHER RISK FACTORS · weather / price / policy / macro")} · {factors.length}
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-px bg-line">
+              <div className="flex flex-wrap gap-px bg-line">
                 {factors.map((f) => (
                   <FactorCard
                     key={f.id}
@@ -195,7 +195,7 @@ function ChokepointCard({
   const altName = lang === "en" ? c.nameZh : c.name;
   const question = lang === "en" ? c.marketQuestion : c.marketQuestionZh;
   return (
-    <div className="bg-panel p-3 flex flex-col gap-1.5">
+    <div className="bg-panel p-3 flex flex-col gap-1.5 flex-1 min-w-[220px] basis-[240px]">
       <div className="flex items-baseline justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
           <span className="text-amber-dim text-[10px]">▣</span>
@@ -249,7 +249,7 @@ function FactorCard({
   const label = lang === "en" ? f.labelEn ?? f.labelZh : f.labelZh;
   const question = lang === "en" ? f.marketQuestionEn ?? f.marketQuestionZh : f.marketQuestionZh;
   return (
-    <div className="bg-panel p-3 flex flex-col gap-1.5">
+    <div className="bg-panel p-3 flex flex-col gap-1.5 flex-1 min-w-[220px] basis-[240px]">
       <div className="flex items-baseline justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
           <span className={`${catTone} text-[10px]`}>{FACTOR_GLYPH[f.category]}</span>

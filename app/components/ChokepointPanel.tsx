@@ -1,7 +1,7 @@
 "use client";
 import { Chokepoint, Factor } from "@/app/lib/cases";
 import { useLang, useT } from "@/app/lib/i18n";
-import { useLiveChokepoints, useLiveFactors } from "@/app/lib/markets";
+import { LiveProbability, useLiveChokepoints, useLiveFactors } from "@/app/lib/markets";
 import { fmtUsd } from "@/app/lib/risk";
 import { useEffect, useMemo, useState } from "react";
 
@@ -40,11 +40,11 @@ const CATEGORY_TONE: Record<Factor["category"], string> = {
 };
 
 /**
- * Live markets panel for the X-Ray view. Shows the chokepoint book on top
- * (海峡 · 通道) and the factor book below (天气 · 原料 · 政策 · 宏观). Both
- * are read live from Polymarket Gamma. Each row reveals the deriv path
- * (`= YES` or `= 1 − YES`) so users can audit how a market price translates
- * into the disruption probability we use for pricing.
+ * Live markets panel — case-scoped (chokepoints relevant to the voyage +
+ * factor exposures pulled from the case definition). Each row is a
+ * collapsible drop-down: header (always visible) shows the gist (name +
+ * live %), click to expand for the market question + derivation path
+ * + 24h volume. Default collapsed → keeps the right sidebar tight on /map.
  */
 export default function ChokepointPanel({
   chokepoints: baseCp,
@@ -57,15 +57,26 @@ export default function ChokepointPanel({
   const { lang } = useLang();
   const { chokepoints, live: liveCp, lastFetch } = useLiveChokepoints(baseCp);
   const { factors, live: liveFactors } = useLiveFactors(baseFactors);
-  // Memoize the merged live map. Bare `{ ...liveCp, ...liveFactors }` would
-  // be a new object every render → child useEffect deps would fire forever.
   const live = useMemo(() => ({ ...liveCp, ...liveFactors }), [liveCp, liveFactors]);
 
   const [probs, setProbs] = useState<Record<string, number>>(() => ({
     ...Object.fromEntries(chokepoints.map((c) => [c.id, c.probability])),
     ...Object.fromEntries(factors.map((f) => [f.id, f.probability])),
   }));
-  const [flash, setFlash] = useState<Record<string, number>>({});
+  /**
+   * Per-row collapse state. Default: ALL expanded so the panel never looks
+   * sparse on first paint. User can collapse individual rows by clicking
+   * the header — the chevron flips ▾ ↔ ▸.
+   */
+  const [expanded, setExpanded] = useState<Record<string, boolean>>(() => {
+    const init: Record<string, boolean> = {};
+    for (const c of baseCp) init[c.id] = true;
+    for (const f of baseFactors) init[f.id] = true;
+    return init;
+  });
+  function toggle(id: string) {
+    setExpanded((e) => ({ ...e, [id]: !e[id] }));
+  }
 
   useEffect(() => {
     setProbs((prev) => {
@@ -80,20 +91,16 @@ export default function ChokepointPanel({
     const t = setInterval(() => {
       setProbs((prev) => {
         const next = { ...prev };
-        const f: Record<string, number> = {};
         for (const c of chokepoints) {
           const drift = (Math.random() - 0.5) * 0.010;
           const base = prev[c.id] ?? c.probability;
           next[c.id] = Math.max(0.005, Math.min(0.995, base + drift));
-          if (Math.random() > 0.5) f[c.id] = Date.now();
         }
         for (const fa of factors) {
           const drift = (Math.random() - 0.5) * 0.010;
           const base = prev[fa.id] ?? fa.probability;
           next[fa.id] = Math.max(0.005, Math.min(0.995, base + drift));
-          if (Math.random() > 0.5) f[fa.id] = Date.now();
         }
-        setFlash((pf) => ({ ...pf, ...f }));
         return next;
       });
     }, 1600);
@@ -129,83 +136,17 @@ export default function ChokepointPanel({
         </div>
       </div>
       <div className="flex flex-col">
-        {chokepoints.map((c) => {
-          const p = probs[c.id] ?? c.probability;
-          const tone = severityTone(c.severity);
-          const flashing = flash[c.id] && Date.now() - flash[c.id] < 800;
-          const liveInfo = c.polymarketSlug ? live[c.polymarketSlug] : undefined;
-          return (
-            <div
-              key={c.id}
-              className={`px-4 py-3 border-b border-line ${flashing ? "tick-flash" : ""}`}
-            >
-              <div className="flex items-baseline justify-between">
-                <div className="flex items-center gap-2">
-                  <span
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{ background: tone.bar }}
-                  />
-                  <span className="text-sm text-text">
-                    {lang === "en" ? c.name : c.nameZh}
-                  </span>
-                  <span className="text-[10px] text-faint">
-                    {lang === "en" ? c.nameZh : c.name}
-                  </span>
-                </div>
-                <div className={`text-lg font-semibold tabular-nums ${tone.text}`}>
-                  {(p * 100).toFixed(1)}%
-                </div>
-              </div>
-
-              <div className="relative h-1 mt-2 bg-line overflow-hidden">
-                <div
-                  className="absolute inset-y-0 left-0 transition-all duration-700"
-                  style={{ width: `${p * 100}%`, background: tone.bar }}
-                />
-              </div>
-
-              <div className="mt-2 text-[10px] text-faint leading-snug">
-                {lang === "en" ? c.marketQuestion : c.marketQuestionZh}
-              </div>
-              {liveInfo && (
-                <div className="mt-1 text-[10px] text-faint leading-snug">
-                  <span className="text-amber-dim">{t("推导 · ", "DERIV · ")}</span>
-                  {c.polymarketSide === "YES" ? (
-                    <>
-                      {t("直接取 YES 价 = ", "= YES = ")}
-                      <span className="text-dim">{(liveInfo.yes * 100).toFixed(1)}%</span>
-                    </>
-                  ) : (
-                    <>
-                      {t("取 (1 − YES) = 1 − ", "= (1 − YES) = 1 − ")}
-                      <span className="text-dim">{(liveInfo.yes * 100).toFixed(1)}%</span>
-                      {" = "}
-                      <span className="text-dim">{((1 - liveInfo.yes) * 100).toFixed(1)}%</span>
-                    </>
-                  )}
-                </div>
-              )}
-              <div className="mt-1.5 flex items-center justify-between text-[10px] text-faint">
-                <span>
-                  {liveInfo ? (
-                    <span className="text-green">
-                      ● {t("实时 · Polymarket", "LIVE · Polymarket")}
-                    </span>
-                  ) : (
-                    <span>
-                      {t("源 · ", "SRC · ")}
-                      {c.marketSource}
-                    </span>
-                  )}
-                </span>
-                <span className="text-dim">
-                  {t("24h 成交 ", "24h vol ")}
-                  {fmtUsd(liveInfo?.volume24h ?? c.volume24h)}
-                </span>
-              </div>
-            </div>
-          );
-        })}
+        {chokepoints.map((c) => (
+          <ChokepointRow
+            key={c.id}
+            c={c}
+            p={probs[c.id] ?? c.probability}
+            lang={lang}
+            liveInfo={c.polymarketSlug ? live[c.polymarketSlug] : undefined}
+            isExpanded={!!expanded[c.id]}
+            onToggle={() => toggle(c.id)}
+          />
+        ))}
       </div>
 
       {/* Factor section (only render if any factors present) */}
@@ -217,77 +158,210 @@ export default function ChokepointPanel({
             </div>
           </div>
           <div className="flex flex-col">
-            {factors.map((f) => {
-              const p = probs[f.id] ?? f.probability;
-              const flashing = flash[f.id] && Date.now() - flash[f.id] < 800;
-              const liveInfo = live[f.polymarketSlug];
-              const label = lang === "en" ? f.labelEn ?? f.labelZh : f.labelZh;
-              const question = lang === "en" ? f.marketQuestionEn ?? f.marketQuestionZh : f.marketQuestionZh;
-              const catTone = CATEGORY_TONE[f.category];
-              const catLabel = lang === "en" ? CATEGORY_LABEL_EN[f.category] : CATEGORY_LABEL_ZH[f.category];
-              const tone = severityTone(f.severity);
-              return (
-                <div
-                  key={f.id}
-                  className={`px-4 py-3 border-b border-line last:border-b-0 ${flashing ? "tick-flash" : ""}`}
-                >
-                  <div className="flex items-baseline justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className={catTone}>{CATEGORY_GLYPH[f.category]}</span>
-                      <span className={`text-[9px] tracking-widest ${catTone}`}>{catLabel}</span>
-                      <span className="text-sm text-text">{label}</span>
-                    </div>
-                    <div className={`text-lg font-semibold tabular-nums ${tone.text}`}>
-                      {(p * 100).toFixed(1)}%
-                    </div>
-                  </div>
-
-                  <div className="relative h-1 mt-2 bg-line overflow-hidden">
-                    <div
-                      className="absolute inset-y-0 left-0 transition-all duration-700"
-                      style={{ width: `${p * 100}%`, background: tone.bar }}
-                    />
-                  </div>
-
-                  <div className="mt-2 text-[10px] text-faint leading-snug">{question}</div>
-                  {liveInfo && (
-                    <div className="mt-1 text-[10px] text-faint leading-snug">
-                      <span className="text-amber-dim">{t("推导 · ", "DERIV · ")}</span>
-                      {f.polymarketSide === "YES" ? (
-                        <>
-                          {t("直接取 YES 价 = ", "= YES = ")}
-                          <span className="text-dim">{(liveInfo.yes * 100).toFixed(1)}%</span>
-                        </>
-                      ) : (
-                        <>
-                          {t("取 (1 − YES) = 1 − ", "= (1 − YES) = 1 − ")}
-                          <span className="text-dim">{(liveInfo.yes * 100).toFixed(1)}%</span>
-                          {" = "}
-                          <span className="text-dim">{((1 - liveInfo.yes) * 100).toFixed(1)}%</span>
-                        </>
-                      )}
-                    </div>
-                  )}
-                  <div className="mt-1.5 flex items-center justify-between text-[10px] text-faint">
-                    <span>
-                      {liveInfo ? (
-                        <span className="text-green">
-                          ● {t("实时 · Polymarket", "LIVE · Polymarket")}
-                        </span>
-                      ) : (
-                        <span>{t("拉取中", "fetching")}</span>
-                      )}
-                    </span>
-                    <span className="text-dim">
-                      {t("24h 成交 ", "24h vol ")}
-                      {fmtUsd(liveInfo?.volume24h ?? f.volume24h)}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+            {factors.map((f) => (
+              <FactorRow
+                key={f.id}
+                f={f}
+                p={probs[f.id] ?? f.probability}
+                lang={lang}
+                liveInfo={live[f.polymarketSlug]}
+                isExpanded={!!expanded[f.id]}
+                onToggle={() => toggle(f.id)}
+              />
+            ))}
           </div>
         </>
+      )}
+    </div>
+  );
+}
+
+function ChokepointRow({
+  c,
+  p,
+  lang,
+  liveInfo,
+  isExpanded,
+  onToggle,
+}: {
+  c: Chokepoint;
+  p: number;
+  lang: "zh" | "en";
+  liveInfo: LiveProbability | undefined;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
+  const t = useT();
+  const tone = severityTone(c.severity);
+  const name = lang === "en" ? c.name : c.nameZh;
+  const altName = lang === "en" ? c.nameZh : c.name;
+  const question = lang === "en" ? c.marketQuestion : c.marketQuestionZh;
+  return (
+    <div className="border-b border-line last:border-b-0">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full px-4 py-2.5 flex items-center justify-between gap-2 hover:bg-panel-2/40 transition-colors text-left"
+      >
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <span
+            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+            style={{ background: tone.bar }}
+          />
+          <span className="text-sm text-text truncate">{name}</span>
+          <span className="text-[10px] text-faint truncate">{altName}</span>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className={`text-base font-semibold tabular-nums ${tone.text}`}>
+            {(p * 100).toFixed(1)}%
+          </span>
+          <span className="text-amber-dim text-xs w-3 text-center">
+            {isExpanded ? "▾" : "▸"}
+          </span>
+        </div>
+      </button>
+
+      {isExpanded && (
+        <div className="px-4 pb-3 pt-1">
+          <div className="relative h-1 bg-line overflow-hidden mb-2">
+            <div
+              className="absolute inset-y-0 left-0 transition-all duration-700"
+              style={{ width: `${p * 100}%`, background: tone.bar }}
+            />
+          </div>
+          <div className="text-[10px] text-faint leading-snug">{question}</div>
+          {liveInfo && (
+            <div className="mt-1 text-[10px] text-faint leading-snug">
+              <span className="text-amber-dim">{t("推导 · ", "DERIV · ")}</span>
+              {c.polymarketSide === "YES" ? (
+                <>
+                  {t("直接取 YES 价 = ", "= YES = ")}
+                  <span className="text-dim">{(liveInfo.yes * 100).toFixed(1)}%</span>
+                </>
+              ) : (
+                <>
+                  {t("取 (1 − YES) = 1 − ", "= (1 − YES) = 1 − ")}
+                  <span className="text-dim">{(liveInfo.yes * 100).toFixed(1)}%</span>
+                  {" = "}
+                  <span className="text-dim">{((1 - liveInfo.yes) * 100).toFixed(1)}%</span>
+                </>
+              )}
+            </div>
+          )}
+          <div className="mt-1.5 flex items-center justify-between text-[10px] text-faint">
+            <span>
+              {liveInfo ? (
+                <span className="text-green">
+                  ● {t("实时 · Polymarket", "LIVE · Polymarket")}
+                </span>
+              ) : (
+                <span>
+                  {t("源 · ", "SRC · ")}
+                  {c.marketSource}
+                </span>
+              )}
+            </span>
+            <span className="text-dim">
+              {t("24h 成交 ", "24h vol ")}
+              {fmtUsd(liveInfo?.volume24h ?? c.volume24h)}
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FactorRow({
+  f,
+  p,
+  lang,
+  liveInfo,
+  isExpanded,
+  onToggle,
+}: {
+  f: Factor;
+  p: number;
+  lang: "zh" | "en";
+  liveInfo: LiveProbability | undefined;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
+  const t = useT();
+  const tone = severityTone(f.severity);
+  const catTone = CATEGORY_TONE[f.category];
+  const catLabel = lang === "en" ? CATEGORY_LABEL_EN[f.category] : CATEGORY_LABEL_ZH[f.category];
+  const label = lang === "en" ? f.labelEn ?? f.labelZh : f.labelZh;
+  const question = lang === "en" ? f.marketQuestionEn ?? f.marketQuestionZh : f.marketQuestionZh;
+  return (
+    <div className="border-b border-line last:border-b-0">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full px-4 py-2.5 flex items-center justify-between gap-2 hover:bg-panel-2/40 transition-colors text-left"
+      >
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <span className={`${catTone} text-[12px] flex-shrink-0`}>
+            {CATEGORY_GLYPH[f.category]}
+          </span>
+          <span className={`${catTone} text-[8px] tracking-widest flex-shrink-0`}>
+            {catLabel}
+          </span>
+          <span className="text-sm text-text truncate">{label}</span>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className={`text-base font-semibold tabular-nums ${tone.text}`}>
+            {(p * 100).toFixed(1)}%
+          </span>
+          <span className="text-amber-dim text-xs w-3 text-center">
+            {isExpanded ? "▾" : "▸"}
+          </span>
+        </div>
+      </button>
+
+      {isExpanded && (
+        <div className="px-4 pb-3 pt-1">
+          <div className="relative h-1 bg-line overflow-hidden mb-2">
+            <div
+              className="absolute inset-y-0 left-0 transition-all duration-700"
+              style={{ width: `${p * 100}%`, background: tone.bar }}
+            />
+          </div>
+          <div className="text-[10px] text-faint leading-snug">{question}</div>
+          {liveInfo && (
+            <div className="mt-1 text-[10px] text-faint leading-snug">
+              <span className="text-amber-dim">{t("推导 · ", "DERIV · ")}</span>
+              {f.polymarketSide === "YES" ? (
+                <>
+                  {t("直接取 YES 价 = ", "= YES = ")}
+                  <span className="text-dim">{(liveInfo.yes * 100).toFixed(1)}%</span>
+                </>
+              ) : (
+                <>
+                  {t("取 (1 − YES) = 1 − ", "= (1 − YES) = 1 − ")}
+                  <span className="text-dim">{(liveInfo.yes * 100).toFixed(1)}%</span>
+                  {" = "}
+                  <span className="text-dim">{((1 - liveInfo.yes) * 100).toFixed(1)}%</span>
+                </>
+              )}
+            </div>
+          )}
+          <div className="mt-1.5 flex items-center justify-between text-[10px] text-faint">
+            <span>
+              {liveInfo ? (
+                <span className="text-green">
+                  ● {t("实时 · Polymarket", "LIVE · Polymarket")}
+                </span>
+              ) : (
+                <span>{t("拉取中", "fetching")}</span>
+              )}
+            </span>
+            <span className="text-dim">
+              {t("24h 成交 ", "24h vol ")}
+              {fmtUsd(liveInfo?.volume24h ?? f.volume24h)}
+            </span>
+          </div>
+        </div>
       )}
     </div>
   );
