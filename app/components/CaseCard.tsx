@@ -19,7 +19,7 @@ export default function CaseCard({ c, index }: { c: Case; index: number }) {
 
   return (
     <Link
-      href={`/quote?case=${c.id}`}
+      href={`/map?case=${c.id}`}
       className={`group relative panel-raised p-5 flex flex-col gap-3.5 transition-colors ${
         isHeadline ? "border-amber hover:border-amber-bright" : "hover:border-amber-dim"
       }`}
