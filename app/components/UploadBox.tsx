@@ -1,5 +1,6 @@
 "use client";
 import { buildDynamicCase, saveDynamicCase } from "@/app/lib/dynamicCase";
+import { readLangSync, useT } from "@/app/lib/i18n";
 import type { DecomposeResult, Shipment } from "@/app/lib/schemas";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -12,13 +13,13 @@ type DocType =
   | "commercial_invoice"
   | "other";
 
-const DOC_TYPE_LABELS: { value: DocType; zh: string; hint: string }[] = [
-  { value: "bill_of_lading", zh: "提单 B/L", hint: "航线 / 船 / 港口 / 日期" },
-  { value: "sale_contract", zh: "销售合同 SPA", hint: "★ 真实违约金条款在这里" },
-  { value: "charter_party", zh: "租船合同", hint: "滞期费 demurrage 条款" },
-  { value: "letter_of_credit", zh: "信用证 L/C", hint: "硬截止日期 + 拒付条款" },
-  { value: "commercial_invoice", zh: "商业发票", hint: "货值 / 单价 / Incoterms" },
-  { value: "other", zh: "其他", hint: "" },
+const DOC_TYPE_LABELS: { value: DocType; zh: string; en: string }[] = [
+  { value: "bill_of_lading", zh: "提单 B/L", en: "Bill of Lading" },
+  { value: "sale_contract", zh: "销售合同 SPA", en: "Sale Contract (SPA)" },
+  { value: "charter_party", zh: "租船合同", en: "Charter Party" },
+  { value: "letter_of_credit", zh: "信用证 L/C", en: "Letter of Credit" },
+  { value: "commercial_invoice", zh: "商业发票", en: "Commercial Invoice" },
+  { value: "other", zh: "其他", en: "Other" },
 ];
 
 type Pending = { file: File; docType: DocType };
@@ -33,20 +34,46 @@ type StepKey =
   | "price"
   | "done";
 
-const STEP_LABELS: Record<StepKey, { label: string; detail: string }> = {
-  upload: { label: "UPLOAD · 接收文件", detail: "读取本地文件 → 转 base64" },
-  ocr: { label: "OCR · Claude Vision", detail: "Claude Opus 4.7 视觉识别 + 字段提取" },
-  ner: { label: "NER · 航运要素", detail: "船名 · 港口 · 日期 · 违约金条款" },
-  route: { label: "ROUTE · 匹配 chokepoint", detail: "解析航线经过的海峡 / 通道" },
-  search: { label: "MKT.SEARCH · Polymarket", detail: "AI 调用 Gamma API 搜索相关市场" },
-  decompose: { label: "AI.DECOMPOSE · 拆出 4 维风险", detail: "天气 / 价格 / 政策 / 宏观" },
-  price: { label: "PRICE · 实时定价", detail: "Gamma 价格 + 损失分布拟合" },
-  done: { label: "READY", detail: "" },
-};
-
 const ORDER: StepKey[] = ["upload", "ocr", "ner", "route", "search", "decompose", "price"];
 
+function stepLabels(t: (zh: string, en: string) => string): Record<StepKey, { label: string; detail: string }> {
+  return {
+    upload: {
+      label: t("UPLOAD · 接收文件", "UPLOAD · Receive files"),
+      detail: t("读取本地文件 → 转 base64", "Read local file → base64"),
+    },
+    ocr: {
+      label: t("OCR · Claude Vision", "OCR · Claude Vision"),
+      detail: t("Claude Opus 4.7 视觉识别 + 字段提取", "Claude Opus 4.7 visual parsing + field extraction"),
+    },
+    ner: {
+      label: t("NER · 航运要素", "NER · Shipment entities"),
+      detail: t("船名 · 港口 · 日期 · 违约金条款", "Vessel · Ports · Dates · LD clauses"),
+    },
+    route: {
+      label: t("ROUTE · 匹配 chokepoint", "ROUTE · Match chokepoints"),
+      detail: t("解析航线经过的海峡 / 通道", "Identify straits / corridors on the lane"),
+    },
+    search: {
+      label: t("MKT.SEARCH · Polymarket", "MKT.SEARCH · Polymarket"),
+      detail: t("AI 调用 Gamma API 搜索相关市场", "AI calls Gamma API to search relevant markets"),
+    },
+    decompose: {
+      label: t("AI.DECOMPOSE · 拆出 4 维风险", "AI.DECOMPOSE · 4 risk vectors"),
+      detail: t("天气 / 价格 / 政策 / 宏观", "Weather / Price / Policy / Macro"),
+    },
+    price: {
+      label: t("PRICE · 实时定价", "PRICE · Live pricing"),
+      detail: t("Gamma 价格 + 损失分布拟合", "Gamma prices + loss distribution fit"),
+    },
+    done: { label: "READY", detail: "" },
+  };
+}
+
 export default function UploadBox() {
+  const t = useT();
+  const labels = stepLabels(t);
+
   const [pending, setPending] = useState<Pending[]>([]);
   const [busy, setBusy] = useState(false);
   const [stepIdx, setStepIdx] = useState(-1);
@@ -64,7 +91,6 @@ export default function UploadBox() {
     const next: Pending[] = [];
     for (let i = 0; i < files.length && pending.length + next.length < 5; i++) {
       const f = files[i];
-      // Default new file's docType: first one is BL, rest are SPA-likely
       const defaultType: DocType =
         pending.length + next.length === 0 ? "bill_of_lading" : "sale_contract";
       next.push({ file: f, docType: defaultType });
@@ -72,8 +98,8 @@ export default function UploadBox() {
     setPending((p) => [...p, ...next]);
   }
 
-  function setDocType(idx: number, t: DocType) {
-    setPending((p) => p.map((x, i) => (i === idx ? { ...x, docType: t } : x)));
+  function setDocType(idx: number, dt: DocType) {
+    setPending((p) => p.map((x, i) => (i === idx ? { ...x, docType: dt } : x)));
   }
 
   function removeFile(idx: number) {
@@ -90,11 +116,12 @@ export default function UploadBox() {
 
     advance("ocr");
     let shipment: Shipment | null = null;
+    const lang = readLangSync();
     try {
       let body: BodyInit;
       let headers: Record<string, string> = {};
       if (useDemo) {
-        body = JSON.stringify({ hint: "" });
+        body = JSON.stringify({ hint: "", lang });
         headers = { "Content-Type": "application/json" };
       } else {
         const fd = new FormData();
@@ -102,6 +129,7 @@ export default function UploadBox() {
           fd.append("file", p.file);
           fd.append("docType", p.docType);
         }
+        fd.append("lang", lang);
         body = fd;
       }
       const r = await fetch("/api/extract", { method: "POST", body, headers });
@@ -113,7 +141,7 @@ export default function UploadBox() {
       shipment = j.shipment;
     } catch (e) {
       const msg = e instanceof Error ? e.message : "extract failed";
-      setError(`OCR 失败: ${msg}`);
+      setError(t(`OCR 失败: ${msg}`, `OCR failed: ${msg}`));
       await new Promise((r) => setTimeout(r, 800));
       router.push("/map?case=saudi-crude-yantai&from=upload-failed");
       return;
@@ -130,7 +158,7 @@ export default function UploadBox() {
       const r = await fetch("/api/decompose", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ shipment }),
+        body: JSON.stringify({ shipment, lang }),
       });
       if (!r.ok) {
         const j = await r.json().catch(() => ({}));
@@ -155,7 +183,7 @@ export default function UploadBox() {
       );
     } catch (e) {
       const msg = e instanceof Error ? e.message : "decompose failed";
-      setError(`AI 拆解失败: ${msg}`);
+      setError(t(`AI 拆解失败: ${msg}`, `AI decomposition failed: ${msg}`));
       await new Promise((r) => setTimeout(r, 800));
       router.push("/map?case=saudi-crude-yantai&from=decompose-failed");
       return;
@@ -178,15 +206,24 @@ export default function UploadBox() {
     <div className="panel-raised p-6 flex flex-col gap-4">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <div className="label-kicker">上传 · 多文档支持</div>
+          <div className="label-kicker">{t("上传 · 多文档支持", "UPLOAD · Multi-document")}</div>
           <div className="text-sm text-dim mt-1">
-            真实 Claude Opus 4.7 视觉提取 + Polymarket 搜索拆解
+            {t(
+              "真实 Claude Opus 4.7 视觉提取 + Polymarket 搜索拆解",
+              "Real Claude Opus 4.7 vision extraction + Polymarket decomposition",
+            )}
           </div>
         </div>
         <div className="text-[10px] text-faint max-w-md leading-relaxed">
-          ★ <span className="text-amber">提单本身不写违约金</span> —
-          要让 AI 提取真实罚则数, 请同时上传销售合同 (SPA) 或租船合同。只传提单,
-          AI 会用行业基准估值并明确标记。
+          ★{" "}
+          <span className="text-amber">
+            {t("提单本身不写违约金", "B/L itself rarely contains LD clauses")}
+          </span>{" "}
+          —{" "}
+          {t(
+            "要让 AI 提取真实罚则数, 请同时上传销售合同 (SPA) 或租船合同。只传提单, AI 会用行业基准估值并明确标记。",
+            "to extract a real penalty number, also upload the sale contract (SPA) or charter party. With only a B/L, AI uses an industry baseline estimate and flags it clearly.",
+          )}
         </div>
       </div>
 
@@ -204,21 +241,24 @@ export default function UploadBox() {
               >
                 {DOC_TYPE_LABELS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
-                    {opt.zh}
+                    {t(opt.zh, opt.en)}
                   </option>
                 ))}
               </select>
               <button
                 onClick={() => removeFile(idx)}
                 className="text-faint hover:text-red text-[11px]"
-                aria-label="移除"
+                aria-label={t("移除", "Remove")}
               >
                 ✕
               </button>
             </div>
           ))}
           <div className="text-[10px] text-faint pl-1">
-            提示: 第一份默认按"提单 B/L"识别, 第二份起按"销售合同 SPA"。点下拉箭头改类型。
+            {t(
+              '提示: 第一份默认按"提单 B/L"识别, 第二份起按"销售合同 SPA"。点下拉箭头改类型。',
+              'Tip: first file defaults to "Bill of Lading", subsequent files default to "Sale Contract (SPA)". Use the dropdown to change.',
+            )}
           </div>
         </div>
       )}
@@ -233,11 +273,11 @@ export default function UploadBox() {
           >
             <div className="text-2xl text-amber-dim">⇪</div>
             <div className="text-dim text-sm">
-              <span className="text-amber">添加文件</span>
+              <span className="text-amber">{t("添加文件", "Add file")}</span>
               <span className="text-faint">
                 {pending.length === 0
                   ? " · PDF / JPG / PNG"
-                  : ` · 已 ${pending.length}/5`}
+                  : ` · ${t(`已 ${pending.length}/5`, `${pending.length}/5 added`)}`}
               </span>
             </div>
           </button>
@@ -245,7 +285,7 @@ export default function UploadBox() {
             onClick={() => runRealPipeline(true)}
             className="btn-ghost px-4 text-[11px] tracking-widest"
           >
-            没文件 · 跑 AI 生成
+            {t("没文件 · 跑 AI 生成", "No files · run AI demo")}
           </button>
         </div>
       )}
@@ -256,7 +296,10 @@ export default function UploadBox() {
           onClick={() => runRealPipeline(false)}
           className="btn-amber w-full py-3 text-sm tracking-[0.3em]"
         >
-          ▸ 提取并拆解 · {pending.length} 份文件
+          {t(
+            `▸ 提取并拆解 · ${pending.length} 份文件`,
+            `▸ EXTRACT & DECOMPOSE · ${pending.length} ${pending.length === 1 ? "file" : "files"}`,
+          )}
         </button>
       )}
 
@@ -265,13 +308,15 @@ export default function UploadBox() {
         <div className="border-2 border-dashed border-amber-dim rounded-sm py-6 px-6">
           <div className="flex items-center gap-2 text-[11px] text-faint mb-3">
             <span className="w-2 h-2 rounded-full bg-amber pulse-dot" />
-            <span className="text-amber">AI 处理中</span>
-            <span className="text-dim">{pending.length} 份文件</span>
+            <span className="text-amber">{t("AI 处理中", "AI working")}</span>
+            <span className="text-dim">
+              {pending.length} {t("份文件", pending.length === 1 ? "file" : "files")}
+            </span>
           </div>
           {ORDER.map((k, i) => {
             const past = i < stepIdx;
             const active = i === stepIdx;
-            const meta = STEP_LABELS[k];
+            const meta = labels[k];
             return (
               <div key={k} className="flex items-center gap-3 text-[11px] py-0.5">
                 <span
@@ -292,7 +337,9 @@ export default function UploadBox() {
             <div className="mt-3 px-3 py-2 border border-line bg-panel-2 text-[10px] text-faint">
               <div className="text-amber-dim tracking-widest mb-1">AI TOOL CALLS</div>
               {callLog.map((line, i) => (
-                <div key={i} className="text-dim">{line}</div>
+                <div key={i} className="text-dim">
+                  {line}
+                </div>
               ))}
             </div>
           )}
@@ -301,7 +348,8 @@ export default function UploadBox() {
 
       {error && (
         <div className="text-[11px] text-red bg-red-dim/10 border border-red-dim/40 px-3 py-2">
-          ⚠ {error} · 已自动回落到旗舰 demo 案例
+          ⚠ {error} ·{" "}
+          {t("已自动回落到旗舰 demo 案例", "Auto-fell-back to flagship demo case")}
         </div>
       )}
 

@@ -1,5 +1,6 @@
 "use client";
 import { Case, Chokepoint } from "@/app/lib/cases";
+import { useLang, useT } from "@/app/lib/i18n";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { GlobeMethods } from "react-globe.gl";
@@ -73,36 +74,43 @@ function probAtPoint(
   return best;
 }
 
-function buildHtml(d: HtmlData): HTMLElement {
+function buildHtml(d: HtmlData, lang: "zh" | "en"): HTMLElement {
   const el = document.createElement("div");
   el.className = "globe-marker";
   const pct = (d.live * 100).toFixed(1);
   const sev = severityColor(d.chokepoint.severity);
-  const sevZh =
-    d.chokepoint.severity === "critical"
+  const sevLabel =
+    lang === "en"
+      ? d.chokepoint.severity.toUpperCase()
+      : d.chokepoint.severity === "critical"
       ? "极高"
       : d.chokepoint.severity === "high"
       ? "高"
       : d.chokepoint.severity === "med"
       ? "中"
       : "低";
+  const riskLabel = lang === "en" ? "RISK" : "风险";
+  const name = lang === "en" ? d.chokepoint.name : d.chokepoint.nameZh;
+  const question = lang === "en" ? d.chokepoint.marketQuestion : d.chokepoint.marketQuestionZh;
+  const liveLabel = lang === "en" ? "● LIVE" : "● 实时";
+  const mktLabel = lang === "en" ? "MKT · 24h" : "市场 · 24h";
   el.innerHTML = `
     <div style="display:flex;flex-direction:column;align-items:center;pointer-events:none;font-family:var(--font-geist-mono),ui-monospace,Menlo,monospace;">
       <div style="width:1px;height:46px;background:linear-gradient(to bottom, ${sev}, transparent);"></div>
       <div style="min-width:160px;padding:6px 8px;background:rgba(11,15,20,0.94);border:1px solid ${sev};box-shadow:0 0 16px ${sev}44;color:#d6dde6;">
         <div style="display:flex;justify-content:space-between;align-items:center;font-size:9px;letter-spacing:0.15em;color:#7b8896;">
           <span>${d.chokepoint.id}</span>
-          <span style="color:${sev};">风险 ${sevZh}</span>
+          <span style="color:${sev};">${riskLabel} ${sevLabel}</span>
         </div>
-        <div style="font-size:11px;color:#d6dde6;margin-top:1px;">${d.chokepoint.nameZh}</div>
+        <div style="font-size:11px;color:#d6dde6;margin-top:1px;">${name}</div>
         <div style="display:flex;align-items:baseline;gap:6px;margin-top:4px;">
           <span style="font-size:18px;font-weight:600;color:#ffb347;font-variant-numeric:tabular-nums;">${pct}%</span>
-          <span style="font-size:9px;color:#7b8896;">市场 · 24h</span>
+          <span style="font-size:9px;color:#7b8896;">${mktLabel}</span>
         </div>
-        <div style="font-size:9px;color:#7b8896;margin-top:2px;line-height:1.3;">${d.chokepoint.marketQuestionZh}</div>
+        <div style="font-size:9px;color:#7b8896;margin-top:2px;line-height:1.3;">${question}</div>
         <div style="display:flex;justify-content:space-between;font-size:9px;color:#4a5663;margin-top:4px;border-top:1px solid #1a2430;padding-top:3px;">
           <span>${d.chokepoint.marketSource}</span>
-          <span style="color:#7dffb1;">● 实时</span>
+          <span style="color:#7dffb1;">${liveLabel}</span>
         </div>
       </div>
     </div>
@@ -168,6 +176,8 @@ export default function Globe({
   focus?: { lat: number; lng: number; altitude?: number };
   height?: number;
 }) {
+  const t = useT();
+  const { lang } = useLang();
   const ref = useRef<GlobeMethods>(undefined);
   const [live, setLive] = useState<Record<string, number>>(() =>
     Object.fromEntries(chokepoints.map((c) => [c.id, c.probability])),
@@ -360,27 +370,30 @@ export default function Globe({
         htmlLat={(d: unknown) => (d as HtmlData).lat}
         htmlLng={(d: unknown) => (d as HtmlData).lng}
         htmlAltitude={0.02}
-        htmlElement={(d: object) => buildHtml(d as HtmlData)}
+        htmlElement={(d: object) => buildHtml(d as HtmlData, lang)}
 
         onGlobeReady={() => setReady(true)}
       />
 
       <div className="pointer-events-none absolute top-3 left-3 text-[10px] text-faint tracking-widest">
-        <div>地球 · DAY/NIGHT · v2026.04</div>
-        <div className="text-amber-dim">数据源 · AIS + POLYMARKET + PORTWATCH</div>
+        <div>{t("地球 · DAY/NIGHT · v2026.04", "GLOBE · DAY/NIGHT · v2026.04")}</div>
+        <div className="text-amber-dim">
+          {t("数据源 · AIS + POLYMARKET + PORTWATCH", "FEED · AIS + POLYMARKET + PORTWATCH")}
+        </div>
       </div>
       <div className="pointer-events-none absolute bottom-3 left-3 text-[10px] text-faint tracking-widest">
-        <div>◉ 实线 = 按风险着色的计划航线</div>
-        <div>◎ 虚线 = 备选航线(可对冲)</div>
+        <div>{t("◉ 实线 = 按风险着色的计划航线", "◉ Solid = planned route, colored by risk")}</div>
+        <div>{t("◎ 虚线 = 备选航线(可对冲)", "◎ Dashed = alternate route (hedgeable)")}</div>
         <div className="mt-1 flex items-center gap-1">
           <span className="w-2 h-1" style={{ background: probColor(0) }} />
           <span className="w-2 h-1" style={{ background: probColor(0.5) }} />
           <span className="w-2 h-1" style={{ background: probColor(1) }} />
-          <span className="text-faint ml-1">低 → 高风险</span>
+          <span className="text-faint ml-1">{t("低 → 高风险", "low → high risk")}</span>
         </div>
       </div>
       <div className="pointer-events-none absolute bottom-3 right-3 text-[10px] text-faint tracking-widest flex items-center gap-2">
-        <span className="w-1.5 h-1.5 rounded-full bg-amber pulse-dot" /> 船流速 = 风险反比
+        <span className="w-1.5 h-1.5 rounded-full bg-amber pulse-dot" />{" "}
+        {t("船流速 = 风险反比", "Ship speed = inverse of risk")}
       </div>
     </div>
   );

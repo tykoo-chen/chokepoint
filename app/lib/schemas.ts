@@ -55,6 +55,12 @@ export const ShipmentSchema = z.object({
     .describe(
       "1 sentence in Chinese explaining the penalty number's source.  If 'contract': cite which document and clause.  If 'estimate': note industry baseline used (e.g. '货值 0.22% / 天 大宗原油基准, 实际请补 SPA / Charter Party').",
     ),
+  penaltySourceNoteEn: z
+    .string()
+    .optional()
+    .describe(
+      "Same as penaltySourceNoteZh but in English. Required when the user's UI is in English.",
+    ),
   documentsSeenZh: z
     .array(
       z.enum([
@@ -75,13 +81,25 @@ export const ShipmentSchema = z.object({
   etd: z.string().describe("ETD as YYYY-MM-DD."),
   eta: z.string().describe("ETA as YYYY-MM-DD."),
   incoterms: z.string().describe("Incoterms, e.g. 'CIF Yantai' or 'FOB Ras Tanura'."),
-  buyer: z.string().describe("Buyer / consignee."),
+  buyer: z.string().describe("Buyer / consignee in Chinese (or origin language)."),
+  buyerEn: z
+    .string()
+    .optional()
+    .describe("Same buyer in English. Required when UI lang is English."),
   documentLabel: z
     .string()
     .describe("Label like 'Bill of Lading · NGB-9847221' or 'Charter Party · VLCC-XX-1234'."),
   titleZh: z
     .string()
     .describe("Short Chinese title for the shipment, like '沙特原油 → 烟台 · 多市场共振'."),
+  titleEn: z
+    .string()
+    .optional()
+    .describe("Same title in English, like 'Saudi crude → Yantai · multi-market resonance'."),
+  cargoEn: z
+    .string()
+    .optional()
+    .describe("Cargo description in English."),
   subtitle: z
     .string()
     .describe("Short uppercase EN subtitle, like 'CRUDE · RAS TANURA → YTG'."),
@@ -90,11 +108,19 @@ export const ShipmentSchema = z.object({
     .describe(
       "One-paragraph Chinese summary of the real business pain — what concretely goes wrong if this shipment is late, with numbers if possible.",
     ),
+  painPointEn: z
+    .string()
+    .optional()
+    .describe("Same painPointZh in English. Required when UI lang is English."),
   realContext: z
     .string()
     .describe(
       "Short Chinese context on why this shipment is exposed to current real-world risks (geopolitics, weather, market conditions). Reference today's events.",
     ),
+  realContextEn: z
+    .string()
+    .optional()
+    .describe("Same realContext in English. Required when UI lang is English."),
   chokepointIds: z
     .array(z.enum(["HORMUZ", "BAB_EL_MANDEB", "SUEZ", "MALACCA", "TAIWAN_STRAIT", "SOUTH_CHINA_SEA", "CAPE"]))
     .describe("Maritime chokepoints this voyage transits. Empty array if none apply."),
@@ -105,18 +131,24 @@ export type Shipment = z.infer<typeof ShipmentSchema>;
 export const FactorRefSchema = z.object({
   category: z.enum(["weather", "price", "policy", "macro"]),
   labelZh: z.string().describe("Short Chinese label for this factor"),
+  labelEn: z.string().optional().describe("Same label in English."),
   polymarketSlug: z.string().describe("Exact Polymarket event slug from the search tool"),
   polymarketSide: z
     .enum(["YES", "NO"])
     .describe(
       "Which side of the market means BAD for this shipment. If 'returns to normal' market — pick NO. If 'attack happens' market — pick YES.",
     ),
-  marketQuestionZh: z.string().describe("Translate the market question into Chinese, ≤ 30 chars."),
+  marketQuestionZh: z.string().describe("Market question translated to Chinese, ≤ 30 chars."),
+  marketQuestionEn: z.string().optional().describe("Original English market question, ≤ 30 chars."),
   rationaleZh: z
     .string()
     .describe(
       "1-2 sentence Chinese explanation of WHY this market price affects THIS specific shipment's outcome.",
     ),
+  rationaleEn: z
+    .string()
+    .optional()
+    .describe("Same rationale in English. Required when UI lang is English."),
   severity: z.enum(["low", "med", "high", "critical"]).describe("How impactful for this shipment."),
 });
 

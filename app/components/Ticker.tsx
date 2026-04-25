@@ -1,8 +1,10 @@
 "use client";
+import { useT } from "@/app/lib/i18n";
 import { useLiveTicker } from "@/app/lib/markets";
 import { useEffect, useState } from "react";
 
 export default function Ticker() {
+  const t = useT();
   const { chokepoints, live, loading } = useLiveTicker();
   const [probs, setProbs] = useState<Record<string, number>>({});
 
@@ -41,7 +43,11 @@ export default function Ticker() {
           }`}
         />
         <span className={liveCount > 0 ? "text-green" : loading ? "text-amber-dim" : "text-red"}>
-          {loading ? "拉取中" : liveCount > 0 ? `POLYMARKET · 实时 × ${liveCount}` : "离线"}
+          {loading
+            ? t("拉取中", "FETCHING")
+            : liveCount > 0
+              ? `POLYMARKET · ${t("实时", "LIVE")} × ${liveCount}`
+              : t("离线", "OFFLINE")}
         </span>
       </div>
       <div className="flex gap-10 py-2 whitespace-nowrap animate-[scroll_55s_linear_infinite] pl-[200px]">
@@ -52,7 +58,7 @@ export default function Ticker() {
           return (
             <div key={`${c.id}-${i}`} className="flex items-center gap-2 text-[11px]">
               <span className={isLive ? "text-amber-dim" : "text-faint"}>
-                {isLive ? "实时" : "市场"}
+                {isLive ? t("实时", "LIVE") : t("市场", "MKT")}
               </span>
               <span className="text-dim">{c.id}</span>
               <span className="text-amber font-semibold tabular-nums">

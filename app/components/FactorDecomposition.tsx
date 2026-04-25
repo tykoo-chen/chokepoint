@@ -1,5 +1,6 @@
 "use client";
-import { Case, Chokepoint, Factor } from "@/app/lib/cases";
+import { Case, Chokepoint, Factor, L } from "@/app/lib/cases";
+import { useLang, useT } from "@/app/lib/i18n";
 import { useLiveFactors } from "@/app/lib/markets";
 import { fmtUsd, fmtPct } from "@/app/lib/risk";
 
@@ -30,16 +31,20 @@ export default function FactorDecomposition({
   case_: Case;
   chokepoints: Chokepoint[];
 }) {
+  const t = useT();
+  const { lang } = useLang();
   const { factors, loading } = useLiveFactors(case_.factors);
 
-  // Combine chokepoints + factors into a single "AI-decomposed" view
   const cards = [
     ...chokepoints.map((c) => ({
       id: c.id,
       category: "chokepoint" as const,
-      labelZh: c.nameZh,
-      marketQuestionZh: c.marketQuestionZh,
-      rationaleZh: `本航线直接经过 ${c.nameZh}, 任何封锁或延误会拖慢到港时间。`,
+      label: lang === "en" ? c.name : c.nameZh,
+      marketQuestion: lang === "en" ? c.marketQuestion : c.marketQuestionZh,
+      rationale:
+        lang === "en"
+          ? `This voyage transits ${c.name}. Any closure or delay drags ETA.`
+          : `本航线直接经过 ${c.nameZh}, 任何封锁或延误会拖慢到港时间。`,
       severity: c.severity,
       probability: c.probability,
       volume24h: c.volume24h,
@@ -48,9 +53,9 @@ export default function FactorDecomposition({
     ...factors.map((f) => ({
       id: f.id,
       category: f.category,
-      labelZh: f.labelZh,
-      marketQuestionZh: f.marketQuestionZh,
-      rationaleZh: f.rationaleZh,
+      label: L(f.labelZh, f.labelEn, lang),
+      marketQuestion: L(f.marketQuestionZh, f.marketQuestionEn, lang),
+      rationale: L(f.rationaleZh, f.rationaleEn, lang),
       severity: f.severity,
       probability: f.probability,
       volume24h: f.volume24h,
@@ -58,39 +63,44 @@ export default function FactorDecomposition({
     })),
   ];
 
-  // group by category
   const grouped = cards.reduce<Record<string, typeof cards>>((acc, c) => {
     (acc[c.category] ??= []).push(c);
     return acc;
   }, {});
 
   const order: (Factor["category"] | "chokepoint")[] = [
-    "chokepoint",
-    "weather",
-    "price",
-    "policy",
-    "macro",
+    "chokepoint", "weather", "price", "policy", "macro",
   ];
 
   return (
     <div className="panel-raised">
       <div className="px-4 py-2.5 border-b border-line flex items-center justify-between">
         <div>
-          <div className="label-kicker text-amber">/// AI 风险拆解 · 跨市场</div>
+          <div className="label-kicker text-amber">
+            /// {t("AI 风险拆解 · 跨市场", "AI RISK DECOMPOSITION · CROSS-MARKET")}
+          </div>
           <div className="text-[10px] text-faint mt-0.5">
-            把一票货拆成 {cards.length} 个独立风险维度, 每个都绑一条真实 Polymarket 合约
+            {t(
+              `把一票货拆成 ${cards.length} 个独立风险维度, 每个都绑一条真实 Polymarket 合约`,
+              `One shipment → ${cards.length} independent risk vectors, each bound to a real Polymarket contract`,
+            )}
           </div>
         </div>
         <div className="text-[10px] text-faint flex items-center gap-1.5">
           {loading ? (
             <>
               <span className="w-1.5 h-1.5 rounded-full bg-amber-dim" />
-              <span className="text-amber-dim">拉取中</span>
+              <span className="text-amber-dim">{t("拉取中", "FETCHING")}</span>
             </>
           ) : (
             <>
               <span className="w-1.5 h-1.5 rounded-full bg-green pulse-dot" />
-              <span className="text-green">实时 · {cards.filter((c) => c.polymarketSlug).length} 条活跃</span>
+              <span className="text-green">
+                {t(
+                  `实时 · ${cards.filter((c) => c.polymarketSlug).length} 条活跃`,
+                  `LIVE · ${cards.filter((c) => c.polymarketSlug).length} active`,
+                )}
+              </span>
             </>
           )}
         </div>
@@ -113,12 +123,8 @@ export default function FactorDecomposition({
                     <span style={{ color: meta.color }} className="text-sm">
                       {meta.icon}
                     </span>
-                    <span className="text-[9px] tracking-widest text-faint">
-                      {meta.en}
-                    </span>
-                    <span className="text-[9px] text-amber-dim">
-                      {meta.zh}
-                    </span>
+                    <span className="text-[9px] tracking-widest text-faint">{meta.en}</span>
+                    <span className="text-[9px] text-amber-dim">{meta.zh}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <span className={`w-1.5 h-1.5 rounded-full ${severityDot(c.severity)}`} />
@@ -128,24 +134,29 @@ export default function FactorDecomposition({
                   </div>
                 </div>
 
-                <div className="mt-1 text-[13px] text-text leading-snug">
-                  {c.labelZh}
-                </div>
-                <div className="mt-1 text-[10px] text-faint">{c.marketQuestionZh}</div>
+                <div className="mt-1 text-[13px] text-text leading-snug">{c.label}</div>
+                <div className="mt-1 text-[10px] text-faint">{c.marketQuestion}</div>
 
                 <div className="mt-2 text-[11px] text-dim leading-relaxed border-t border-line pt-2">
-                  <span className="text-amber-dim tracking-widest text-[9px]">为什么和本票相关 · </span>
-                  {c.rationaleZh}
+                  <span className="text-amber-dim tracking-widest text-[9px]">
+                    {t("为什么和本票相关 · ", "WHY THIS SHIPMENT · ")}
+                  </span>
+                  {c.rationale}
                 </div>
 
                 <div className="mt-2 flex items-center justify-between text-[10px] text-faint">
                   {c.polymarketSlug ? (
-                    <span className="text-green">● Polymarket · 实时</span>
+                    <span className="text-green">
+                      ● Polymarket · {t("实时", "LIVE")}
+                    </span>
                   ) : (
-                    <span>无直接市场 · 使用代理</span>
+                    <span>{t("无直接市场 · 使用代理", "No direct market · using proxy")}</span>
                   )}
                   {c.volume24h > 0 && (
-                    <span>24h 成交 {fmtUsd(c.volume24h)}</span>
+                    <span>
+                      {t("24h 成交 ", "24h vol ")}
+                      {fmtUsd(c.volume24h)}
+                    </span>
                   )}
                 </div>
               </div>
@@ -154,11 +165,16 @@ export default function FactorDecomposition({
       </div>
 
       <div className="px-4 py-2.5 border-t border-line text-[10px] text-faint leading-relaxed">
-        <span className="text-amber-dim tracking-widest">AI 要点 · </span>
-        这 {cards.length} 个维度<span className="text-amber">彼此独立</span> —
-        一个发生不代表另一个发生。传统货运险只保物理损坏, 无法同时应对 4 个维度。
-        我们把保费按每个维度的"边际贡献"拆到对应 Polymarket / 再保险 / 运价衍生品上,
-        任意一条触发都有对应赔付来源。
+        <span className="text-amber-dim tracking-widest">{t("AI 要点 · ", "AI INSIGHT · ")}</span>
+        {t(
+          `这 ${cards.length} 个维度`,
+          `These ${cards.length} dimensions are `,
+        )}
+        <span className="text-amber">{t("彼此独立", "mutually independent")}</span>
+        {t(
+          " — 一个发生不代表另一个发生。传统货运险只保物理损坏, 无法同时应对 4 个维度。我们把保费按每个维度的边际贡献拆到对应 Polymarket / 再保险 / 运价衍生品上, 任意一条触发都有对应赔付来源。",
+          " — one firing doesn't imply another. Traditional cargo cover only handles physical damage, never multiple risk vectors at once. We split your premium by each dimension's marginal contribution into Polymarket / reinsurance / freight derivatives — any single trigger has a matched payout source.",
+        )}
       </div>
     </div>
   );

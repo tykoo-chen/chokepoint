@@ -1,4 +1,5 @@
 "use client";
+import { useT } from "@/app/lib/i18n";
 import { useEffect, useState } from "react";
 
 function fmtTime(d: Date) {
@@ -9,15 +10,22 @@ function fmtTime(d: Date) {
 }
 
 export default function TopBar({ screen, threat = 3 }: { screen: string; threat?: number }) {
+  const t = useT();
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
     setNow(new Date());
-    const t = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(t);
+    const tt = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(tt);
   }, []);
 
-  const threatLabel = threat <= 2 ? "低" : threat <= 4 ? "偏高" : threat <= 6 ? "高" : "极高";
-  const threatEn = threat <= 2 ? "LOW" : threat <= 4 ? "ELEVATED" : threat <= 6 ? "HIGH" : "CRITICAL";
+  const threatLabel =
+    threat <= 2
+      ? t("低 · LOW", "LOW")
+      : threat <= 4
+      ? t("偏高 · ELEVATED", "ELEVATED")
+      : threat <= 6
+      ? t("高 · HIGH", "HIGH")
+      : t("极高 · CRITICAL", "CRITICAL");
   const threatColor = threat <= 2 ? "text-green" : threat <= 4 ? "text-amber" : "text-red";
 
   return (
@@ -29,23 +37,24 @@ export default function TopBar({ screen, threat = 3 }: { screen: string; threat?
           <span className="text-faint">v0.1 · demo</span>
         </div>
         <div className="hidden md:flex items-center gap-1 text-faint">
-          <span>页面</span>
+          <span>{t("页面", "SCREEN")}</span>
           <span className="text-dim">/</span>
           <span className="text-amber">{screen}</span>
         </div>
         <div className="flex-1" />
         <div className="hidden sm:flex items-center gap-1 text-faint">
-          <span>风险</span>
+          <span>{t("风险", "THREAT")}</span>
           <span className="text-dim">/</span>
           <span className={`${threatColor} font-semibold`}>
-            {threatLabel} · {threatEn} · {threat}/10
+            {threatLabel} · {threat}/10
           </span>
         </div>
         <div className="hidden md:flex items-center gap-1 text-faint">
-          <span>数据源</span>
+          <span>{t("数据源", "FEED")}</span>
           <span className="text-dim">/</span>
           <span className="text-green flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-green pulse-dot" /> 实时
+            <span className="w-1.5 h-1.5 rounded-full bg-green pulse-dot" />
+            {t("实时", "LIVE")}
           </span>
         </div>
         <div className="text-dim tabular-nums">{now ? fmtTime(now) : "····-··-·· ··:··:··Z"}</div>

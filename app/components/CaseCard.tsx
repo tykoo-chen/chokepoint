@@ -1,10 +1,19 @@
 "use client";
-import { Case } from "@/app/lib/cases";
+import { Case, L } from "@/app/lib/cases";
+import { useLang, useT } from "@/app/lib/i18n";
 import { fmtMoney } from "@/app/lib/risk";
 import Link from "next/link";
 
 export default function CaseCard({ c, index }: { c: Case; index: number }) {
+  const t = useT();
+  const { lang } = useLang();
   const isHeadline = c.id === "xbot-jebelali";
+
+  const title = L(c.title, c.titleEn, lang);
+  const cargo = L(c.cargo, c.cargoEn, lang);
+  const painPoint = L(c.painPointZh, c.painPointEn, lang) ?? "";
+  const client = L(c.clientZh, c.clientEn, lang);
+
   return (
     <Link
       href={`/map?case=${c.id}`}
@@ -17,37 +26,41 @@ export default function CaseCard({ c, index }: { c: Case; index: number }) {
           isHeadline ? "bg-amber/20 border-amber-dim text-amber" : "bg-amber/10 border-line text-amber-dim"
         }`}
       >
-        {isHeadline ? `真实 · APR 2026` : `LEC · #0${index + 1}`}
+        {isHeadline ? t("真实 · APR 2026", "REAL · APR 2026") : `LEC · #0${index + 1}`}
       </div>
 
       <div>
-        <div className="label-kicker mb-1">{c.clientZh ?? "航次"}</div>
-        <div className="text-lg text-text leading-tight">{c.title}</div>
+        <div className="label-kicker mb-1">{client ?? t("航次", "VOYAGE")}</div>
+        <div className="text-lg text-text leading-tight">{title}</div>
         <div className="text-[11px] text-faint tracking-wider mt-0.5">{c.subtitle}</div>
       </div>
 
-      {c.painPointZh && (
+      {painPoint && (
         <div className="text-[11px] text-dim leading-relaxed border-l-2 border-amber-dim pl-2">
-          {c.painPointZh}
+          {painPoint}
         </div>
       )}
 
       <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-[11px]">
         <div>
-          <div className="text-faint">货品</div>
-          <div className="text-dim truncate">{c.cargo.split(",")[0].replace(/\(.*\)/, "")}</div>
+          <div className="text-faint">{t("货品", "CARGO")}</div>
+          <div className="text-dim truncate">{cargo.split(",")[0].replace(/\(.*\)/, "")}</div>
         </div>
         <div>
-          <div className="text-faint">货值</div>
+          <div className="text-faint">{t("货值", "VALUE")}</div>
           <div className="text-amber tabular-nums">{fmtMoney(c.cargoValueUsd, c.currency)}</div>
         </div>
         <div>
-          <div className="text-faint">航程</div>
-          <div className="text-dim tabular-nums">{c.baselineTransitDays} 天</div>
+          <div className="text-faint">{t("航程", "TRANSIT")}</div>
+          <div className="text-dim tabular-nums">
+            {c.baselineTransitDays} {t("天", "d")}
+          </div>
         </div>
         <div>
-          <div className="text-faint">缓冲</div>
-          <div className="text-dim tabular-nums">{c.bufferDays} 天</div>
+          <div className="text-faint">{t("缓冲", "BUFFER")}</div>
+          <div className="text-dim tabular-nums">
+            {c.bufferDays} {t("天", "d")}
+          </div>
         </div>
       </div>
 
@@ -63,7 +76,7 @@ export default function CaseCard({ c, index }: { c: Case; index: number }) {
           )}
         </div>
         <span className="text-amber text-[11px] tracking-widest group-hover:text-amber-bright">
-          运行 →
+          {t("运行 →", "RUN →")}
         </span>
       </div>
     </Link>

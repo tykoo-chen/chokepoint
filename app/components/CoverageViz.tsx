@@ -1,5 +1,6 @@
 "use client";
 import { Case } from "@/app/lib/cases";
+import { useT } from "@/app/lib/i18n";
 import { fmtMoney, RiskModel } from "@/app/lib/risk";
 
 const W = 780;
@@ -16,6 +17,7 @@ function lognormalPdf(x: number, mu: number, sigma: number) {
 }
 
 export default function CoverageViz({ case_, risk }: { case_: Case; risk: RiskModel }) {
+  const t = useT();
   const maxDay = Math.max(risk.p99DelayDays + 5, 45);
   const mu = Math.log(Math.max(1, risk.p50DelayDays));
   const sigma = 0.9;
@@ -49,8 +51,12 @@ export default function CoverageViz({ case_, risk }: { case_: Case; risk: RiskMo
   return (
     <div className="panel-raised">
       <div className="px-4 py-2.5 border-b border-line flex items-center justify-between">
-        <div className="label-kicker">/// 延误分布 · 保障形状</div>
-        <div className="text-[10px] text-faint tracking-widest">对数正态 · 来自 842 次可比航次拟合</div>
+        <div className="label-kicker">
+          /// {t("延误分布 · 保障形状", "DELAY DISTRIBUTION · COVER SHAPE")}
+        </div>
+        <div className="text-[10px] text-faint tracking-widest">
+          {t("对数正态 · 来自 842 次可比航次拟合", "Lognormal · fit on 842 comparable voyages")}
+        </div>
       </div>
 
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto block">
@@ -95,7 +101,7 @@ export default function CoverageViz({ case_, risk }: { case_: Case; risk: RiskMo
           stroke="#7dffb1" strokeWidth="1" strokeDasharray="2 2"
         />
         <text x={xFor(case_.bufferDays)} y={PAD_T - 4} fill="#7dffb1" fontSize="9" textAnchor="middle">
-          缓冲 {case_.bufferDays}d
+          {t("缓冲 ", "BUFFER ")}{case_.bufferDays}d
         </text>
 
         {triggers.map((t) => (
@@ -132,26 +138,31 @@ export default function CoverageViz({ case_, risk }: { case_: Case; risk: RiskMo
         ))}
 
         <text x={PAD_L - 6} y={PAD_T + 6} fill="#4a5663" fontSize="9" textAnchor="end">
-          概率密度
+          {t("概率密度", "density")}
         </text>
         <text x={W - PAD_R} y={H - PAD_B + 24} fill="#4a5663" fontSize="9" textAnchor="end">
-          比预抵 ETA 晚多少天 →
+          {t("比预抵 ETA 晚多少天 →", "days late vs scheduled ETA →")}
         </text>
       </svg>
 
       <div className="border-t border-line px-4 py-3 grid grid-cols-4 gap-3 text-[11px]">
-        {triggers.map((t) => (
-          <div key={t.label} className="panel p-2">
-            <div className="text-[9px] text-faint tracking-widest">{t.label.split(" · ")[0]} · 触发器</div>
-            <div className="text-dim">晚 ≥ {t.d} 天</div>
+        {triggers.map((trig) => (
+          <div key={trig.label} className="panel p-2">
+            <div className="text-[9px] text-faint tracking-widest">
+              {trig.label.split(" · ")[0]} · {t("触发器", "TRIGGER")}
+            </div>
+            <div className="text-dim">
+              {t(`晚 ≥ ${trig.d} 天`, `Late ≥ ${trig.d}d`)}
+            </div>
             <div className="text-amber tabular-nums mt-1">
-              赔 {fmtMoney(Math.round(risk.recommendedCoverageUsd * t.payout), case_.currency)}
+              {t("赔 ", "Pay ")}
+              {fmtMoney(Math.round(risk.recommendedCoverageUsd * trig.payout), case_.currency)}
             </div>
           </div>
         ))}
         <div className="panel p-2 border-amber-dim">
-          <div className="text-[9px] text-amber-dim tracking-widest">保额上限</div>
-          <div className="text-dim">封顶全额赔付</div>
+          <div className="text-[9px] text-amber-dim tracking-widest">{t("保额上限", "POLICY LIMIT")}</div>
+          <div className="text-dim">{t("封顶全额赔付", "Full payout cap")}</div>
           <div className="text-amber text-lg tabular-nums mt-1">
             {fmtMoney(risk.recommendedCoverageUsd, case_.currency)}
           </div>

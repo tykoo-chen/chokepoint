@@ -41,13 +41,20 @@ export async function POST(req: Request) {
   }
 
   let shipment: Shipment;
+  let lang: "zh" | "en" = "zh";
   try {
-    const body = (await req.json()) as { shipment: Shipment };
+    const body = (await req.json()) as { shipment: Shipment; lang?: string };
     shipment = ShipmentSchema.parse(body.shipment);
+    if (body.lang === "en" || body.lang === "zh") lang = body.lang;
   } catch (err) {
     const msg = err instanceof Error ? err.message : "invalid body";
     return NextResponse.json({ error: msg }, { status: 400 });
   }
+
+  const langInstruction =
+    lang === "en"
+      ? "\n\nIMPORTANT: User's UI is currently English. For EACH factor, fill labelZh AND labelEn, marketQuestionZh AND marketQuestionEn, rationaleZh AND rationaleEn — both languages, same content. The English fields are what the user actually sees."
+      : "\n\nImportant: For EACH factor, the Zh fields are required and shown to the user. EN fields (labelEn / marketQuestionEn / rationaleEn) are optional but recommended.";
 
   const client = new Anthropic();
 
@@ -90,7 +97,7 @@ export async function POST(req: Request) {
       // and 3-4x faster than Opus on this loop — fits Vercel's 60s ceiling.
       model: "claude-sonnet-4-6",
       max_tokens: 4000,
-      system: SYSTEM,
+      system: SYSTEM + langInstruction,
       tools: [searchTool, submitTool],
       messages: [{ role: "user", content: userPrompt }],
       max_iterations: 6,

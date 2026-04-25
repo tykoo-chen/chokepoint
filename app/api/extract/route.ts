@@ -54,6 +54,7 @@ export async function POST(req: Request) {
   type Img = { base64: string; mediaType: AnyMediaType; filename: string; docHint?: string };
   const images: Img[] = [];
   let userPrompt = "";
+  let lang: "zh" | "en" = "zh";
 
   try {
     const ct = req.headers.get("content-type") ?? "";
@@ -61,7 +62,8 @@ export async function POST(req: Request) {
       const form = await req.formData();
       const hint = form.get("hint");
       if (typeof hint === "string") userPrompt = hint;
-      // Accept any number of `file` entries (we cap at 5 for token / latency budget).
+      const langField = form.get("lang");
+      if (langField === "en" || langField === "zh") lang = langField;
       const files = form.getAll("file");
       const docHints = form.getAll("docType");
       for (let i = 0; i < files.length && images.length < 5; i++) {
@@ -77,12 +79,18 @@ export async function POST(req: Request) {
         });
       }
     } else if (ct.includes("application/json")) {
-      const body = (await req.json()) as { hint?: string };
+      const body = (await req.json()) as { hint?: string; lang?: string };
       userPrompt = body.hint ?? "";
+      if (body.lang === "en" || body.lang === "zh") lang = body.lang;
     }
   } catch {
     return NextResponse.json({ error: "could not parse request body" }, { status: 400 });
   }
+
+  const langInstruction =
+    lang === "en"
+      ? "\n\nIMPORTANT: The user's UI is currently English. Fill ALL English fields (titleEn, cargoEn, painPointEn, realContextEn, penaltySourceNoteEn, buyerEn, clientEn, altRouteLabelEn, plus factor labelEn / marketQuestionEn / rationaleEn) with high-quality English. The Chinese fields (titleZh / painPointZh / etc) must STILL be filled with the same content in Chinese. Output BOTH languages."
+      : "";
 
   const client = new Anthropic();
 
@@ -110,7 +118,7 @@ export async function POST(req: Request) {
     const response = await client.messages.parse({
       model: "claude-opus-4-7",
       max_tokens: 8000,
-      system: SYSTEM,
+      system: SYSTEM + langInstruction,
       messages: [{ role: "user", content: userContent }],
       output_config: { format: zodOutputFormat(ShipmentSchema) },
     });

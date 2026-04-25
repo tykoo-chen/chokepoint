@@ -29,11 +29,14 @@ export type Factor = {
   id: string;
   category: "weather" | "price" | "policy" | "macro";
   labelZh: string;
+  labelEn?: string;
   // Polymarket binding
   polymarketSlug: string;
   polymarketSide: "YES" | "NO"; // which side represents "bad for this shipment"
   marketQuestionZh: string;
+  marketQuestionEn?: string;
   rationaleZh: string; // why this particular shipment is exposed to this factor
+  rationaleEn?: string;
   severity: "low" | "med" | "high" | "critical";
   // live-refreshed
   probability: number;
@@ -43,8 +46,10 @@ export type Factor = {
 export type Case = {
   id: string;
   title: string;
+  titleEn?: string;
   subtitle: string;
   cargo: string;
+  cargoEn?: string;
   hsCode: string;
   cargoValueUsd: number;
   currency: "USD" | "GBP" | "CNY" | "EUR";
@@ -54,13 +59,16 @@ export type Case = {
   waypoints: LatLng[];
   altRoute?: LatLng[];
   altRouteLabel?: string;
+  altRouteLabelEn?: string;
   baselineTransitDays: number;
   bufferDays: number;
   contractPenaltyPerDayUsd: number;
   /** "contract" = real clause in user-uploaded doc · "estimate" = industry typical */
   penaltySource?: "contract" | "estimate";
   penaltySourceNoteZh?: string;
+  penaltySourceNoteEn?: string;
   documentsSeenZh?: string[];
+  documentsSeenEn?: string[];
   chokepointIds: string[];
   factors?: Factor[]; // extra factor exposures beyond chokepoints
   ship: string;
@@ -68,10 +76,14 @@ export type Case = {
   eta: string;
   incoterms: string;
   buyer: string;
+  buyerEn?: string;
   documentLabel: string;
   realContext?: string;
+  realContextEn?: string;
   painPointZh?: string;
+  painPointEn?: string;
   clientZh?: string;
+  clientEn?: string;
   sources?: { label: string; url: string }[];
 };
 
@@ -206,8 +218,10 @@ export const CASES: Case[] = [
   {
     id: "saudi-crude-yantai",
     title: "沙特原油 → 烟台 · 多市场共振",
+    titleEn: "Saudi crude → Yantai · multi-market resonance",
     subtitle: "FLAGSHIP · MULTI-FACTOR · RAS TANURA → YTG",
     cargo: "Arabian Light Crude (沙特阿美轻质原油)",
+    cargoEn: "Arabian Light Crude (Saudi Aramco light sweet)",
     hsCode: "2709.00",
     cargoValueUsd: 128_000_000,
     currency: "USD",
@@ -230,6 +244,7 @@ export const CASES: Case[] = [
       { lat: 37.45, lng: 121.4 },
     ],
     altRouteLabel: "走 Lombok 绕 Malacca (+3d, 避过柔佛海峡风险)",
+    altRouteLabelEn: "Lombok Strait bypass (+3d, avoids Singapore Strait congestion)",
     baselineTransitDays: 24,
     bufferDays: 6,
     contractPenaltyPerDayUsd: 280_000,
@@ -239,10 +254,13 @@ export const CASES: Case[] = [
         id: "wx-hurricane-us",
         category: "weather",
         labelZh: "美国飓风季 · 墨西哥湾",
+        labelEn: "US hurricane season · Gulf of Mexico",
         polymarketSlug: "will-a-hurricane-make-landfall-in-the-us-by-may-31",
         polymarketSide: "YES",
         marketQuestionZh: "5 月 31 日前美国本土是否遭飓风登陆?",
+        marketQuestionEn: "Will a hurricane make landfall in the US by May 31?",
         rationaleZh: "一旦飓风登陆德州 / 路易斯安那, 美国页岩油产量下滑, 精炼厂停产 → Brent/WTI 走高 → 炼厂向沙特抢货 → 买方可能拒收或重新议价, 与本票到港时间赛跑。",
+        rationaleEn: "Hurricane landfall in TX/LA cuts US shale output and refinery throughput → Brent/WTI spike → buyers scramble for Saudi cargoes → your buyer may reject or renegotiate, racing this voyage's ETA.",
         severity: "med",
         probability: 0.068,
         volume24h: 180,
@@ -251,10 +269,13 @@ export const CASES: Case[] = [
         id: "price-wti-atl",
         category: "price",
         labelZh: "WTI 原油极端价",
+        labelEn: "WTI extreme price",
         polymarketSlug: "crude-oil-all-time-high-by-april-30",
         polymarketSide: "YES",
         marketQuestionZh: "4 月底前原油突破历史高点?",
+        marketQuestionEn: "Crude oil all-time-high by April 30?",
         rationaleZh: "如果油价暴涨, 炼厂利润率(crack spread) 压缩, 买方可能推迟提货或重议 FOB/CIF 差价; 这条对应 basis 风险。",
+        rationaleEn: "If crude spikes, refiner crack spread compresses → buyer may delay lifting or renegotiate FOB/CIF differential. This is the basis-risk leg.",
         severity: "med",
         probability: 0.012,
         volume24h: 123_000,
@@ -263,10 +284,13 @@ export const CASES: Case[] = [
         id: "policy-ru-ukr",
         category: "policy",
         labelZh: "俄乌停火 · 影响俄油回流",
+        labelEn: "Russia-Ukraine ceasefire · Russian crude flow",
         polymarketSlug: "russia-x-ukraine-ceasefire-by-may-31-2026",
         polymarketSide: "YES",
         marketQuestionZh: "5 月 31 日前俄乌达成停火?",
+        marketQuestionEn: "Russia × Ukraine ceasefire by May 31, 2026?",
         rationaleZh: "停火一旦落地, 制裁解除预期 → 俄油回欧洲 / 减少流入中国 → Urals 折扣扩大 → 中石化可能转而买便宜的俄油, 沙特溢价崩塌, 本票合同可能被重新议价。",
+        rationaleEn: "If a ceasefire lands, sanctions relief expectations rise → Russian crude flows back to Europe / less to China → Urals discount widens → Sinopec may pivot to cheaper Russian barrels, Saudi premium collapses, this contract gets renegotiated.",
         severity: "high",
         probability: 0.0415,
         volume24h: 97_000,
@@ -275,10 +299,13 @@ export const CASES: Case[] = [
         id: "macro-fed-jun",
         category: "macro",
         labelZh: "美联储 6 月利率决议",
+        labelEn: "Fed June rate decision",
         polymarketSlug: "fed-decision-in-june-825",
         polymarketSide: "YES",
         marketQuestionZh: "美联储 6 月是否按兵不动?",
+        marketQuestionEn: "Will the Fed hold rates in June?",
         rationaleZh: "Fed 不降息 → 美元强势 → 新兴市场货币承压 + 全球原油需求回落 → 炼厂下修采购量; 间接影响本票结算和库存节奏。",
+        rationaleEn: "Fed holds → strong USD → EM currency pressure + global crude demand softens → refiner cuts purchase volumes; indirectly impacts this voyage's settlement and inventory pace.",
         severity: "med",
         probability: 0.835,
         volume24h: 524_000,
@@ -289,12 +316,18 @@ export const CASES: Case[] = [
     eta: "2026-05-20",
     incoterms: "CFR Yantai",
     buyer: "Sinopec Yantai Refinery · 中石化烟台炼厂",
+    buyerEn: "Sinopec Yantai Refinery",
     documentLabel: "Charter Party · VLCC-SC-2104",
     clientZh: "中石化 / 大宗商品交易台",
+    clientEn: "Sinopec / commodity trading desk",
     painPointZh:
       "这票 $128M 不是被一个风险影响, 而是被 4 个看似无关的市场同时挤压 — 霍尔木兹、美国飓风、油价、俄乌停火, 每个都能推迟提货或重议合同。AI 要做的是把这 4 个独立维度拆清楚, 再分别对冲。",
+    painPointEn:
+      "This $128M cargo is squeezed by 4 seemingly unrelated markets simultaneously — Hormuz, US hurricanes, crude price, Russia-Ukraine ceasefire — each can delay lifting or trigger contract renegotiation. AI's job is to decompose these 4 independent vectors and hedge them separately.",
     realContext:
       "2026-04-24 实况: 霍尔木兹基本封锁 + 大西洋飓风季临近 + WTI 尾部风险活跃市场 $1.4M 24h vol + 俄乌停火谈判反复。一票标准沙特原油同时挂了 4 个独立 Polymarket 合约。",
+    realContextEn:
+      "April 24, 2026: Hormuz effectively blockaded + Atlantic hurricane season approaching + WTI tail-risk market trading $1.4M 24h vol + Russia-Ukraine ceasefire talks oscillating. A single standard Saudi-crude voyage is simultaneously exposed to 4 independent Polymarket contracts.",
     sources: [
       { label: "Polymarket · WTI April", url: "https://polymarket.com/event/what-price-will-wti-hit-in-april-2026" },
       { label: "Polymarket · US hurricane by May 31", url: "https://polymarket.com/event/will-a-hurricane-make-landfall-in-the-us-by-may-31" },
@@ -305,8 +338,10 @@ export const CASES: Case[] = [
   {
     id: "xbot-jebelali",
     title: "XBOT 服务机器人 → 迪拜 · 霍尔木兹直击",
+    titleEn: "XBOT service robots → Dubai · Hormuz direct hit",
     subtitle: "REAL · APR 2026 · SZX → JEBEL ALI",
     cargo: "XBOT 服务 / 清洁机器人 · 40 台 + 安装包",
+    cargoEn: "XBOT service & cleaning robots · 40 units + commissioning kit",
     hsCode: "8479.89",
     cargoValueUsd: 1_520_000, // ~£1.2M
     currency: "GBP",
@@ -329,6 +364,7 @@ export const CASES: Case[] = [
       { lat: 25.01, lng: 55.06 },
     ],
     altRouteLabel: "改走 Jeddah 转沙特陆运 (+11d, 需 ATA 文件 + 保税过境)",
+    altRouteLabelEn: "Re-route via Jeddah + Saudi land bridge (+11d, requires ATA carnet + bonded transit)",
     baselineTransitDays: 22,
     bufferDays: 4,
     contractPenaltyPerDayUsd: 190_000, // ~£150K/d client LD
@@ -338,12 +374,18 @@ export const CASES: Case[] = [
     eta: "2026-05-16",
     incoterms: "DAP Jebel Ali",
     buyer: "Majid Al Futtaim · Mall of the Emirates 扩建店",
+    buyerEn: "Majid Al Futtaim · Mall of the Emirates expansion",
     documentLabel: "House B/L · SZX-JEA-88104",
     clientZh: "LEC Robotics · 中东扩张项目",
+    clientEn: "LEC Robotics · Middle East expansion programme",
     painPointZh:
       "中东购物节启用日期合同锁死, 晚 1 天罚款 £150K + 40 位工程师窝工 + 客户启用仪式推迟。",
+    painPointEn:
+      "Mall opening date is contract-locked to the regional shopping festival. Each day late = £150K liquidated damages + 40 idle engineers + customer launch ceremony postponed.",
     realContext:
       "2026-04-24 实况:美伊战事第 55 天, 霍尔木兹海峡自 2 月 28 日起基本关闭, 4 月 19 日仅 3 艘船通行; Polymarket 显示 5 月 31 日前恢复正常概率仅 33%。Jebel Ali 进港都必须过这道海峡 — 这是 LEC 机器人业务扩张到中东的最硬约束。",
+    realContextEn:
+      "April 24, 2026 — Day 55 of the US-Iran war. Strait of Hormuz effectively closed since Feb 28; only 3 vessels transited on April 19. Polymarket prices the chance of normal traffic by May 31 at 33%. Every Jebel Ali call must transit this chokepoint — the hardest single constraint on LEC's Middle East expansion.",
     sources: [
       { label: "CNBC · Hormuz 基本关闭", url: "https://www.cnbc.com/2026/04/22/iran-war-strait-hormuz-tanker-ship-trump-blockade.html" },
       { label: "Polymarket · Hormuz 5/15 前恢复", url: "https://polymarket.com/event/strait-of-hormuz-traffic-returns-to-normal-by-may-15" },
@@ -354,8 +396,10 @@ export const CASES: Case[] = [
   {
     id: "tsingtao-felixstowe",
     title: "青岛啤酒 → Felixstowe · 夏季促销窗口",
+    titleEn: "Tsingtao Beer → Felixstowe · summer promo window",
     subtitle: "REAL BIZ · QINGDAO → FELIXSTOWE (UK)",
     cargo: "青岛啤酒 · 500ml 罐装 · 混合 SKU",
+    cargoEn: "Tsingtao Beer · 500ml cans · mixed SKUs",
     hsCode: "2203.00",
     cargoValueUsd: 610_000, // ~£480K goods value
     currency: "GBP",
@@ -378,6 +422,7 @@ export const CASES: Case[] = [
       { lat: 51.96, lng: 1.32 },
     ],
     altRouteLabel: "全程绕好望角 (+12d, 避开红海; 目前主流班轮都在这么走)",
+    altRouteLabelEn: "Full Cape of Good Hope reroute (+12d, avoids Red Sea; what major liners are doing right now)",
     baselineTransitDays: 32,
     bufferDays: 14, // summer promo prep buffer
     contractPenaltyPerDayUsd: 9_500, // ~£7.5K/d stockout + promo penalty
@@ -387,12 +432,18 @@ export const CASES: Case[] = [
     eta: "2026-05-20",
     incoterms: "CIF Felixstowe",
     buyer: "LEC Beverages Group · Tsingtao UK 渠道分销",
+    buyerEn: "LEC Beverages Group · Tsingtao UK distribution",
     documentLabel: "B/L · FEL-MAE-20260518",
     clientZh: "LEC Beverages · 青岛啤酒英国独家分销",
+    clientEn: "LEC Beverages · Tsingtao UK sole distributor",
     painPointZh:
       "夏季促销档期和 Costco / LWC / Wing Yip 合同提前 4 个月锁定。晚到 = 断货 + 渠道罚款 + 错过最值钱的销售窗口。",
+    painPointEn:
+      "Summer promo windows with Costco / LWC / Wing Yip are locked 4 months ahead. Late arrival = stockout + channel penalty + losing the highest-margin selling window of the year.",
     realContext:
       "2026-04-24 实况: 红海因胡塞武装威胁 + 伊朗战事, 亚洲-欧洲主流班轮持续绕行好望角, 苏伊士通行量较危机前下降约 40%, Asia-UK 航程普遍比正常延长 10-14 天。Maersk / Hapag / MSC 在 Q2 仍维持好望角路由。",
+    realContextEn:
+      "April 24, 2026: Red Sea remains hostile due to Houthi threats + Iran war. Major Asia-Europe liners continue to reroute via the Cape; Suez transits down ~40% vs pre-crisis. Asia-UK voyages run 10-14 days longer than normal. Maersk / Hapag / MSC keep Cape routing through Q2.",
     sources: [
       { label: "Polymarket · 好望角绕行比例", url: "https://polymarket.com/event/cape-of-good-hope-rerouting" },
       { label: "Kalshi · 苏伊士通行量", url: "https://kalshi.com" },
@@ -403,8 +454,10 @@ export const CASES: Case[] = [
   {
     id: "xbot-heathrow",
     title: "XBOT 清洁机器人 → Heathrow T5 投产",
+    titleEn: "XBOT cleaning robots → Heathrow T5 go-live",
     subtitle: "REAL BIZ · SZX → LHR via Southampton",
     cargo: "XBOT 商用清洁机器人 · 50 台 + 调试套件",
+    cargoEn: "XBOT commercial cleaning robots · 50 units + commissioning kit",
     hsCode: "8479.89",
     cargoValueUsd: 1_080_000, // ~£850K
     currency: "GBP",
@@ -426,6 +479,7 @@ export const CASES: Case[] = [
       { lat: 50.9, lng: -1.4 },
     ],
     altRouteLabel: "走苏伊士抢速度 (-10d, 但需买 war-risk 加费)",
+    altRouteLabelEn: "Suez sprint (-10d, but requires buying war-risk surcharge)",
     baselineTransitDays: 38,
     bufferDays: 7,
     contractPenaltyPerDayUsd: 100_000, // £80K/d LD after buffer
@@ -435,12 +489,18 @@ export const CASES: Case[] = [
     eta: "2026-05-24",
     incoterms: "DAP Heathrow",
     buyer: "Heathrow Airport Ltd · Terminal 5 商用升级",
+    buyerEn: "Heathrow Airport Ltd · Terminal 5 commercial upgrade",
     documentLabel: "B/L · SZX-SOU-261128",
     clientZh: "LEC Robotics · XBOT UK 独家分销",
+    clientEn: "LEC Robotics · XBOT UK sole distributor",
     painPointZh:
       "机场 T5 投产日合同锁死, 40 位驻场工程师已动员; 设备晚 1 天 = £80K 罚款 + 工程师窝工 + 客户推迟 go-live。",
+    painPointEn:
+      "Airport T5 go-live date is contract-locked. 40 on-site engineers already mobilised. Each day late = £80K LD + idle engineers + customer's downstream commercial contracts all push.",
     realContext:
       "红海危机导致 Asia-UK 主流航线绕好望角, 比正常多 12 天。Heathrow 类项目最怕的不是货坏, 而是 go-live 日期被迫推迟, 连带下游商业合同全推迟。",
+    realContextEn:
+      "Red Sea crisis is forcing major Asia-UK liners around the Cape — 12 extra days vs normal. The thing Heathrow-class projects fear isn't damaged cargo, it's go-live being pushed, which cascades into every downstream commercial contract.",
     sources: [
       { label: "LEC Robotics · 英国独家分销", url: "https://lecrobotics.com" },
       { label: "XBOT 官网 · LEC 合作", url: "https://xbotww.com" },
@@ -448,6 +508,12 @@ export const CASES: Case[] = [
     ],
   },
 ];
+
+/** Pick the right localized field, falling back to the Chinese / source field if EN is missing. */
+export function L<T>(zh: T, en: T | undefined, lang: "zh" | "en"): T {
+  if (lang === "en" && en !== undefined && en !== null && en !== "") return en;
+  return zh;
+}
 
 export function caseById(id: string | null | undefined): Case {
   // Dynamic case (AI-extracted from a user upload) lives in localStorage.
