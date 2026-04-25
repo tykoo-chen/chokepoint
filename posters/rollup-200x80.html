@@ -2,12 +2,12 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8" />
-<title>JUSTINCASE · 万一 · 易拉宝 200×80cm (人话版)</title>
+<title>JUSTINCASE · 万一 · 易拉宝 200×80cm</title>
 <style>
   @page { size: 80cm 200cm; margin: 0; }
 
   :root {
-    --bg: #07090d; --panel: #0e1218; --line: #1a2230;
+    --bg: #07090d; --panel: #0e1218; --panel-2: #151a23; --line: #1a2230;
     --amber: #ffb347; --amber-dim: #b07b30; --amber-bright: #ffc870;
     --green: #7dffb1; --red: #ff5a4a;
     --text: #d6dde6; --dim: #7b8896; --faint: #4a5663;
@@ -39,56 +39,68 @@
   }
 
   /* HEADER */
-  .header { padding-bottom: 3cm; border-bottom: 0.15cm solid var(--amber); }
-  .corner-meta { display: flex; justify-content: space-between; font-size: 0.85cm; color: var(--faint); letter-spacing: 0.4em; margin-bottom: 2cm; }
+  .header { padding-bottom: 2.5cm; border-bottom: 0.15cm solid var(--amber); }
+  .corner-meta { display: flex; justify-content: space-between; font-size: 0.85cm; color: var(--faint); letter-spacing: 0.4em; margin-bottom: 1.5cm; }
   .corner-meta .dot { display: inline-block; width: 0.5cm; height: 0.5cm; background: var(--amber); border-radius: 50%; margin-right: 0.5cm; vertical-align: middle; }
-  .wordmark { font-size: 9.5cm; line-height: 1; color: var(--amber); letter-spacing: 0.06em; font-weight: 700; }
+  .wordmark { font-size: 9cm; line-height: 1; color: var(--amber); letter-spacing: 0.06em; font-weight: 700; }
   .wordmark .cn { color: var(--amber-bright); margin-left: 0.8cm; font-size: 0.55em; vertical-align: 0.2em; }
-  .tagline { font-size: 3.6cm; color: var(--text); line-height: 1.15; margin-top: 2cm; font-weight: 600; }
+  .tagline { font-size: 3.4cm; color: var(--text); line-height: 1.15; margin-top: 1.6cm; font-weight: 700; }
   .tagline .accent { color: var(--amber); }
-  .tagline-sub { font-size: 1.4cm; color: var(--dim); margin-top: 1.2cm; line-height: 1.4; }
+  .tagline-sub { font-size: 1.3cm; color: var(--dim); margin-top: 0.9cm; line-height: 1.4; }
 
   /* SECTION */
-  .section { padding: 2.4cm 0; border-bottom: 1px solid var(--line); }
+  .section { padding: 2cm 0; border-bottom: 1px solid var(--line); }
   .section:last-of-type { border-bottom: none; }
-  .section-kicker { font-size: 1cm; color: var(--amber); letter-spacing: 0.4em; margin-bottom: 1.2cm; }
-  .section-title { font-size: 2.6cm; line-height: 1.15; color: var(--text); margin-bottom: 1cm; font-weight: 700; }
+  .kicker { font-size: 1cm; color: var(--amber); letter-spacing: 0.4em; margin-bottom: 1cm; }
+  .h2 { font-size: 2.4cm; line-height: 1.15; color: var(--text); font-weight: 700; }
 
-  /* THE GAP */
-  .gap-box { display: flex; gap: 1.4cm; align-items: flex-start; padding: 1.8cm; background: rgba(255,90,74,0.06); border-left: 0.3cm solid var(--red); margin-top: 1cm; }
+  /* 痛点 */
+  .gap-box { display: flex; gap: 1.4cm; align-items: flex-start; padding: 1.6cm; background: rgba(255,90,74,0.06); border-left: 0.3cm solid var(--red); margin-top: 1cm; }
   .gap-box .left { font-size: 2.6cm; color: var(--red); font-weight: 700; line-height: 1; }
-  .gap-box .text { font-size: 1.4cm; color: var(--text); line-height: 1.55; }
+  .gap-box .text { font-size: 1.3cm; color: var(--text); line-height: 1.55; }
   .gap-box .text .em { color: var(--amber); font-weight: 700; }
   .gap-box .text .strike { color: var(--faint); }
 
-  /* STEPS */
-  .steps { display: grid; grid-template-columns: 1.6cm 1fr; gap: 1.4cm 1.4cm; margin-top: 1.4cm; }
-  .step-num { font-size: 2.2cm; color: var(--amber); font-weight: 700; line-height: 1; }
-  .step-body { padding-bottom: 1.5cm; }
-  .step-headline { font-size: 1.7cm; color: var(--text); line-height: 1.25; font-weight: 700; }
-  .step-detail { font-size: 1cm; color: var(--dim); margin-top: 0.6cm; line-height: 1.5; }
-  .step-detail .em { color: var(--text); font-weight: 600; }
+  /* 1. 我们做什么 */
+  .what-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1cm; align-items: stretch; margin-top: 1.2cm; }
+  .what-card { padding: 1.4cm; background: var(--panel-2); border: 1px solid var(--line); }
+  .what-card.right { border: 1px solid var(--amber); }
+  .what-card .label { font-size: 0.85cm; color: var(--amber); letter-spacing: 0.3em; margin-bottom: 0.5cm; }
+  .what-card .h { font-size: 2cm; color: var(--text); font-weight: 700; line-height: 1.2; }
+  .what-card .body { font-size: 1cm; color: var(--dim); line-height: 1.5; margin-top: 0.7cm; }
+  .what-card .body .em { color: var(--amber); font-weight: 700; }
+  .what-arrow { display: flex; align-items: center; justify-content: center; color: var(--amber); font-size: 3cm; font-weight: 700; }
 
-  /* STATS */
-  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5cm; margin-top: 1.2cm; }
-  .stat { padding: 1.8cm; background: var(--panel); border: 1px solid var(--line); border-left: 0.25cm solid var(--amber); }
-  .stat .num { font-size: 5.5cm; color: var(--amber); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-  .stat .unit { font-size: 1cm; color: var(--amber-dim); letter-spacing: 0.3em; margin-top: 0.7cm; }
-  .stat .desc { font-size: 0.95cm; color: var(--dim); margin-top: 0.7cm; line-height: 1.45; }
+  /* 2. 我们怎么做 */
+  .steps { display: grid; grid-template-columns: 1.6cm 1fr; gap: 1cm 1.2cm; margin-top: 1.2cm; }
+  .step-num { font-size: 2cm; color: var(--amber); font-weight: 700; line-height: 1; }
+  .step-h { font-size: 1.5cm; color: var(--text); line-height: 1.2; font-weight: 700; }
+  .step-body { font-size: 0.95cm; color: var(--dim); margin-top: 0.4cm; line-height: 1.5; }
+  .step-body .em { color: var(--text); font-weight: 600; }
 
-  /* WHO BUYS */
-  .holder-grid { display: grid; grid-template-columns: 1fr; gap: 1cm; margin-top: 1.2cm; }
-  .holder-row { padding: 1.4cm; background: var(--panel); border: 1px solid var(--line); }
-  .holder-row .who { font-size: 1.2cm; color: var(--green); font-weight: 700; margin-bottom: 0.5cm; }
-  .holder-row .who.seller { color: var(--amber); }
-  .holder-row .body { font-size: 1.3cm; color: var(--text); line-height: 1.4; }
-  .holder-row .body .em { color: var(--amber); font-weight: 700; }
+  /* 3. 市场策略 */
+  .gtm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1cm; margin-top: 1.2cm; }
+  .gtm-card { padding: 1.2cm; background: var(--panel-2); border: 1px solid var(--line); border-left: 0.25cm solid var(--amber); }
+  .gtm-card.audience { border-left-color: var(--green); }
+  .gtm-card .h { font-size: 1.4cm; color: var(--text); font-weight: 700; }
+  .gtm-card .h .em { color: var(--amber); }
+  .gtm-card .h.audience .em { color: var(--green); }
+  .gtm-card .row { font-size: 1cm; color: var(--dim); line-height: 1.5; margin-top: 0.6cm; }
+  .gtm-card .row .em { color: var(--text); font-weight: 700; }
+
+  /* 4. 差异化 */
+  .diff-table { display: grid; grid-template-columns: 1.5fr 1.2fr 1.2fr; gap: 0; margin-top: 1.2cm; border: 1px solid var(--line); }
+  .diff-cell { padding: 0.7cm 0.9cm; font-size: 1cm; line-height: 1.4; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .diff-cell:nth-child(3n) { border-right: none; }
+  .diff-cell.head { background: var(--panel); color: var(--amber); font-weight: 700; letter-spacing: 0.15em; font-size: 0.95cm; }
+  .diff-cell.dim { color: var(--dim); }
+  .diff-cell.us { color: var(--text); background: rgba(125,255,177,0.04); font-weight: 700; }
 
   /* FOOTER */
-  .footer { margin-top: auto; padding-top: 2.5cm; border-top: 0.15cm solid var(--amber); display: grid; grid-template-columns: 1fr 14cm; gap: 1.5cm; align-items: center; }
+  .footer { margin-top: auto; padding-top: 2cm; border-top: 0.15cm solid var(--amber); display: grid; grid-template-columns: 1fr 14cm; gap: 1.5cm; align-items: center; }
   .cta-kicker { font-size: 1cm; color: var(--amber); letter-spacing: 0.4em; }
-  .cta-url { font-size: 2.2cm; color: var(--text); font-weight: 700; line-height: 1.1; word-break: break-all; margin-top: 0.6cm; }
-  .cta-tag { font-size: 1.05cm; color: var(--amber-dim); letter-spacing: 0.05em; margin-top: 0.6cm; }
+  .cta-url { font-size: 2.2cm; color: var(--text); font-weight: 700; line-height: 1.1; word-break: break-all; margin-top: 0.5cm; }
+  .cta-tag { font-size: 1cm; color: var(--amber-dim); margin-top: 0.5cm; }
   .qr-box { width: 14cm; height: 14cm; background: white; padding: 0.6cm; box-sizing: border-box; }
   .qr-box img { width: 100%; height: 100%; display: block; }
 
@@ -110,104 +122,155 @@
         <span>2026 · #ATTRAX 春潮 SPRING 黑客松</span>
       </div>
       <div class="wordmark">JUSTINCASE<span class="cn">万一</span></div>
-      <div class="tagline">货晚了, <span class="accent">我们照赔。</span></div>
-      <div class="tagline-sub">船没坏, 货也没坏 — 就是晚到了。这种损失, 我们赔。</div>
+      <div class="tagline">卖保险的。<span class="accent">货晚了, 我们照赔。</span></div>
+      <div class="tagline-sub">把全球预测市场打包成一张保单, 卖给跨境贸易公司。</div>
     </div>
 
+    <!-- 0. 痛点 -->
     <div class="section">
-      <div class="section-kicker">/// 你头疼的那件事</div>
-      <div class="section-title">船没沉, 货还在 —<br/>但你晚了两周。</div>
+      <div class="kicker">/// 你头疼的那件事</div>
+      <div class="h2">船没沉, 货还在 — 但你晚了两周。</div>
       <div class="gap-box">
         <div class="left">⚠</div>
         <div class="text">
-          促销错过了。工程师在工地上等着发工资。客户按天罚你款 —
-          这些钱真真实实从你账上消失了。<br/><br/>
+          促销错过了。工程师在工地等着发工资。客户按天罚你款 — 这些钱真真实实从你账上消失了。<br/><br/>
           可你的<span class="strike">传统货运险</span>?
           <span class="em">一分不赔。</span>
           它只管"货物物理损坏"。<br/><br/>
-          晚到的损失, 一直没人保。<span class="em">直到我们。</span>
+          <span class="em">霍尔木兹 4 月 19 日单日仅 3 艘船过</span> → $128M 沙特原油 → 传统赔付 $0 → 买方实际损失 $17M, 全部自吞。
         </div>
       </div>
     </div>
 
+    <!-- 1. 我们做什么 -->
     <div class="section">
-      <div class="section-kicker">/// 我们怎么帮你</div>
+      <div class="kicker">/// 1 · 我们做什么</div>
+      <div class="h2">卖保险。<br/>把全球预测市场, 打包成保险。</div>
+      <div class="what-row">
+        <div class="what-card">
+          <div class="label">原料 · INPUT</div>
+          <div class="h">全球预测市场</div>
+          <div class="body">
+            <span class="em">$300M 日成交</span> · Polymarket + Kalshi 等。
+            真金白银押注真实事件 — 红海会不会封 / 油价会不会破纪录 / Fed 会不会降息。
+            实时、透明、不拍脑袋。
+          </div>
+        </div>
+        <div class="what-arrow">→</div>
+        <div class="what-card right">
+          <div class="label">产品 · OUTPUT</div>
+          <div class="h">一张参数化保单</div>
+          <div class="body">
+            <span class="em">20 秒出单</span>, <span class="em">72 小时到账</span>。
+            标准条款 / 固定保额 / 清楚的触发条件。
+            CFO 签字, 财务走标准流程。底层多市场对冲你不用关心。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 我们怎么做 -->
+    <div class="section">
+      <div class="kicker">/// 2 · 我们怎么做 (4 步, 全自动)</div>
       <div class="steps">
         <div class="step-num">①</div>
-        <div class="step-body">
-          <div class="step-headline">把你的系统接进来。</div>
-          <div class="step-detail">
-            <span class="em">订单 · 合同 · 排期 · 财务模型</span> — 我们直接读, 不用你一份份上传 PDF。
-            你公司里那个 AI 助手把信息直接交给我们。
+        <div>
+          <div class="step-h">读你的航次</div>
+          <div class="step-body">
+            提单 / 销售合同 / 项目排期 — <span class="em">AI 直接读</span>, 不用你录入。
+            一票货 4 个关键参数 (路线 · 货品 · 货值 · 晚一天罚多少) 自动提取。
           </div>
         </div>
-
         <div class="step-num">②</div>
-        <div class="step-body">
-          <div class="step-headline">AI 把这一票货能踩的坑都列出来。</div>
-          <div class="step-detail">
-            红海封不封？大西洋会不会提前来风暴？油价飙没飙？英国会不会加息？—
-            <span class="em">你这一票, 同时挂着 4 到 5 个独立风险。</span>
+        <div>
+          <div class="step-h">AI 把这一票的风险拆开</div>
+          <div class="step-body">
+            海峡封不封 / 大西洋会不会提前来风暴 / 油价飙不飙 / Fed 降不降息 / 政策黑天鹅 —
+            <span class="em">这一票货同时挂着 4-6 个独立风险</span>。
           </div>
         </div>
-
         <div class="step-num">③</div>
-        <div class="step-body">
-          <div class="step-headline">每个风险, 对应一个真实押注市场。</div>
-          <div class="step-detail">
-            全世界有人花真钱押 "红海会封到 5 月底"。<br/>
-            <span class="em">我们直接看市场价 — 不是精算师拍脑袋。</span>
-            报价 = 市场报价。透明、公正、随时变。
+        <div>
+          <div class="step-h">每个风险, 对应一个真实押注市场</div>
+          <div class="step-body">
+            从 4000+ 活跃事件里, AI 自动找到这一票相关的 4-6 个,
+            <span class="em">实时取价</span>。报价 = 市场报价, 不是精算师拍脑袋。
           </div>
         </div>
-
         <div class="step-num">④</div>
-        <div class="step-body">
-          <div class="step-headline">点一下投保。出事 72 小时打款。</div>
-          <div class="step-detail">
-            真出事了 — <span class="em">卫星看你船在哪</span>, 港口数据看到没到, 系统自动判断。
-            不用扯皮, 不写理赔单, 钱直接到账。
+        <div>
+          <div class="step-h">打包成保单, 一键投保</div>
+          <div class="step-body">
+            合规壳层包好, 卖给客户的就是一张标准保单。出事 — 卫星看你船在哪, 港口数据自动判,
+            <span class="em">72 小时打款</span>。
           </div>
         </div>
       </div>
     </div>
 
+    <!-- 3. 市场策略 -->
     <div class="section">
-      <div class="section-kicker">/// 关键数字</div>
-      <div class="stats">
-        <div class="stat">
-          <div class="num">20 秒</div>
-          <div class="unit">从数据到保单</div>
-          <div class="desc">全自动。同行业现在做这件事要 7 周。</div>
+      <div class="kicker">/// 3 · 市场策略 · 谁会买 + 怎么卖</div>
+      <div class="gtm-row">
+        <div class="gtm-card audience">
+          <div class="h audience">▸ 谁会买 — <span class="em">客户画像</span></div>
+          <div class="row">
+            <span class="em">买方一方</span> (75%+ 跨境贸易) ·
+            进口商 / 贸易公司 / 渠道分销 ·
+            合同里签过"晚一天罚 X 元"那条款的, 都需要这张保单。
+          </div>
+          <div class="row">
+            <span class="em">卖方一方</span> (项目交付) ·
+            EPC / 系统集成 / 设备出口 ·
+            把"投产日期"钉死在合同里的那批人。
+          </div>
         </div>
-        <div class="stat">
-          <div class="num">72 小时</div>
-          <div class="unit">出事到打款</div>
-          <div class="desc">不见理赔员, 不写理赔单。<br/>系统自动判断, 直接到账。</div>
+        <div class="gtm-card">
+          <div class="h">▸ 怎么卖 — <span class="em">3 条渠道</span></div>
+          <div class="row">
+            <span class="em">直销</span> · 给中型贸易公司 (年货量 $20M+), 直接对接 CFO / 风控负责人。
+          </div>
+          <div class="row">
+            <span class="em">经纪人白标</span> · 接 Marsh / AON 的客户, 已经在卖货运险但客户抱怨延误不赔。我们做后台。
+          </div>
+          <div class="row">
+            <span class="em">Lloyd's 辛迪加</span> · 我们做 MGA, 用他们的合规壳, 我们承担定价 + 拆解 + 自动对冲。利润分成。
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- 4. 差异化 -->
     <div class="section">
-      <div class="section-kicker">/// 谁会用</div>
-      <div class="holder-grid">
-        <div class="holder-row">
-          <div class="who">▸ 买方 · 进货的一方 (大部分跨境贸易)</div>
-          <div class="body">
-            进口商 · 贸易公司 · 渠道分销 · 制造业采购 —
-            合同里签过 <span class="em">"晚一天罚 X 元"</span> 这条款的, 都需要这张保单。
-          </div>
-        </div>
-        <div class="holder-row">
-          <div class="who seller">▸ 卖方 · 做项目交付 (设备 / 整厂 / 调试)</div>
-          <div class="body">
-            机场设备 · 整厂搬迁 · 电站调试 · 系统集成 —
-            把 <span class="em">投产日期</span> 钉死在合同里, 晚一天就要赔的那批人。
-          </div>
-        </div>
+      <div class="kicker">/// 4 · 差异化 · 我们改变了什么</div>
+      <div class="diff-table">
+        <div class="diff-cell head">维度</div>
+        <div class="diff-cell head">传统货运险</div>
+        <div class="diff-cell head">JUSTINCASE</div>
+
+        <div class="diff-cell">报价时间</div>
+        <div class="diff-cell dim">7 周 · 邮件 + 精算师审</div>
+        <div class="diff-cell us">20 秒 · AI 全自动</div>
+
+        <div class="diff-cell">定价依据</div>
+        <div class="diff-cell dim">精算师拍脑袋 · 历史数据</div>
+        <div class="diff-cell us">全球市场实时报价</div>
+
+        <div class="diff-cell">触发判定</div>
+        <div class="diff-cell dim">查勘员现场 · 来回扯皮</div>
+        <div class="diff-cell us">卫星 + 港口数据自动判</div>
+
+        <div class="diff-cell">赔付速度</div>
+        <div class="diff-cell dim">3-12 个月 · 来回拉锯</div>
+        <div class="diff-cell us">72 小时 · 直接到账</div>
+
+        <div class="diff-cell">透明度</div>
+        <div class="diff-cell dim">黑箱 · 不知道保费去哪</div>
+        <div class="diff-cell us">每一分都看得见</div>
       </div>
     </div>
 
+    <!-- FOOTER -->
     <div class="footer">
       <div>
         <div class="cta-kicker">/// 现在就试 · 扫码进 demo</div>
