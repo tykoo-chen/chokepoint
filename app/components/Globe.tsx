@@ -8,13 +8,6 @@ import * as THREE from "three";
 
 const GlobeComp = dynamic(() => import("react-globe.gl"), { ssr: false });
 
-type PathData = {
-  coords: [number, number, number][];
-  color: string[]; // one color per waypoint — react-globe.gl interpolates
-  stroke: number;
-  dashAnimate: number;
-};
-
 type RingData = { lat: number; lng: number; color: string; maxRadius: number; propagationSpeed: number; repeatPeriod: number };
 
 type PointData = { lat: number; lng: number; color: string; radius: number; altitude: number };
@@ -60,18 +53,8 @@ function severityColor(s: Chokepoint["severity"]): string {
   }
 }
 
-/** Great-circle distance in degrees (rough; fine for "nearest chokepoint" ranking). */
-function distDeg(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
-  const dLat = a.lat - b.lat;
-  let dLng = a.lng - b.lng;
-  if (dLng > 180) dLng -= 360;
-  if (dLng < -180) dLng += 360;
-  return Math.sqrt(dLat * dLat + dLng * dLng);
-}
-
-/** Blend green → amber → red based on probability 0..1. */
+/** Blend green → amber → red based on probability 0..1. Used for the legend gradient. */
 function probColor(p: number): string {
-  // 0 → green, 0.5 → amber, 1 → red
   if (p <= 0.5) {
     const t = p / 0.5;
     const r = Math.round(0x7d + (0xff - 0x7d) * t);
@@ -84,24 +67,6 @@ function probColor(p: number): string {
   const g = Math.round(0xb3 - (0xb3 - 0x5a) * t);
   const b = Math.round(0x47 - (0x47 - 0x4a) * t);
   return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
-}
-
-/** For each waypoint: find the nearest chokepoint within 18° and return its prob weighted by proximity. */
-function probAtPoint(
-  waypoint: { lat: number; lng: number },
-  chokepoints: Chokepoint[],
-  liveProbs: Record<string, number>,
-): number {
-  let best = 0;
-  for (const c of chokepoints) {
-    const d = distDeg(waypoint, c);
-    if (d > 18) continue;
-    const proximity = 1 - d / 18; // 0 at 18°, 1 at 0°
-    const p = liveProbs[c.id] ?? c.probability;
-    const contrib = p * proximity;
-    if (contrib > best) best = contrib;
-  }
-  return best;
 }
 
 function buildHtml(d: HtmlData, lang: "zh" | "en"): HTMLElement {
@@ -319,21 +284,6 @@ export default function Globe({
     }
   }, [ready, focus]);
 
-  // Route with per-waypoint color based on nearest chokepoint probability
-  const peakProb = chokepoints.reduce((m, c) => Math.max(m, live[c.id] ?? c.probability), 0);
-  const pathCoords: [number, number, number][] = case_.waypoints.map((w) => [w.lat, w.lng, 0.012]);
-  const pathColors = case_.waypoints.map((w) => probColor(probAtPoint(w, chokepoints, live)));
-  const altCoords: [number, number, number][] | null = case_.altRoute ? case_.altRoute.map((w) => [w.lat, w.lng, 0.007]) : null;
-  const altColors = case_.altRoute?.map(() => "#2d7d4e") ?? [];
-
-  // Dash animate time: higher peak probability → slower flow (visually "stuck")
-  const dashTime = Math.round(1200 + peakProb * 6000); // 1.2s at 0 prob → 7.2s at 1.0
-
-  const paths: PathData[] = [
-    { coords: pathCoords, color: pathColors, stroke: 1.8, dashAnimate: dashTime },
-    ...(altCoords ? [{ coords: altCoords, color: altColors, stroke: 0.8, dashAnimate: 6500 }] : []),
-  ];
-
   const rings: RingData[] = chokepoints.map((c) => ({
     lat: c.lat,
     lng: c.lng,
@@ -344,39 +294,8 @@ export default function Globe({
   }));
 
   const endpoints: PointData[] = [
-    { lat: case_.origin.lat, lng: case_.origin.lng, color: "#7dffb1", radius: 0.6, altitude: 0.015 },
-    { lat: case_.destination.lat, lng: case_.destination.lng, color: "#ffb347", radius: 0.7, altitude: 0.02 },
-  ];
-
-  // Ship dot that walks the route
-  const [shipT, setShipT] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => {
-      // higher peak prob = slower ship
-      const step = 0.003 + (1 - peakProb) * 0.010;
-      setShipT((p) => (p + step) % 1);
-    }, 90);
-    return () => clearInterval(t);
-  }, [peakProb]);
-
-  const shipPos = useMemo(() => {
-    const coords = case_.waypoints;
-    const segs = coords.length - 1;
-    const total = shipT * segs;
-    const i = Math.min(Math.floor(total), segs - 1);
-    const frac = total - i;
-    const a = coords[i];
-    const b = coords[i + 1];
-    // simple linear interp — fine at this resolution
-    let lng = a.lng + (b.lng - a.lng) * frac;
-    const lat = a.lat + (b.lat - a.lat) * frac;
-    if (lng > 180) lng -= 360;
-    if (lng < -180) lng += 360;
-    return { lat, lng };
-  }, [shipT, case_.waypoints]);
-
-  const shipPoint: PointData[] = [
-    { lat: shipPos.lat, lng: shipPos.lng, color: probColor(peakProb), radius: 0.45, altitude: 0.025 },
+    { lat: case_.origin.lat, lng: case_.origin.lng, color: "#7dffb1", radius: 0.7, altitude: 0.018 },
+    { lat: case_.destination.lat, lng: case_.destination.lng, color: "#ffb347", radius: 0.8, altitude: 0.022 },
   ];
 
   const factorsWithGeo = (factors ?? []).filter(
@@ -400,33 +319,6 @@ export default function Globe({
     })),
   ];
 
-  // Route centroid — used to anchor connector arcs from off-route market markers.
-  const routeCentroid = useMemo(() => {
-    const wp = case_.waypoints;
-    let lat = 0,
-      lng = 0;
-    for (const p of wp) {
-      lat += p.lat;
-      lng += p.lng;
-    }
-    return { lat: lat / wp.length, lng: lng / wp.length };
-  }, [case_.waypoints]);
-
-  type FactorArc = {
-    startLat: number;
-    startLng: number;
-    endLat: number;
-    endLng: number;
-    color: string;
-  };
-  const factorArcs: FactorArc[] = factorsWithGeo.map((f) => ({
-    startLat: f.lat,
-    startLng: f.lng,
-    endLat: routeCentroid.lat,
-    endLng: routeCentroid.lng,
-    color: FACTOR_COLOR[f.category],
-  }));
-
   return (
     <div ref={wrapRef} className="relative w-full" style={{ height }}>
       <GlobeComp
@@ -441,18 +333,6 @@ export default function Globe({
         atmosphereAltitude={0.20}
         showGraticules={true}
 
-        pathsData={paths}
-        pathPoints={(d: unknown) => (d as PathData).coords}
-        pathPointLat={(p: unknown) => (p as [number, number, number])[0]}
-        pathPointLng={(p: unknown) => (p as [number, number, number])[1]}
-        pathPointAlt={(p: unknown) => (p as [number, number, number])[2]}
-        pathColor={(d: unknown) => (d as PathData).color}
-        pathStroke={(d: unknown) => (d as PathData).stroke}
-        pathDashLength={0.3}
-        pathDashGap={0.2}
-        pathDashAnimateTime={(d: unknown) => (d as PathData).dashAnimate}
-        pathTransitionDuration={0}
-
         ringsData={rings}
         ringLat={(d: unknown) => (d as RingData).lat}
         ringLng={(d: unknown) => (d as RingData).lng}
@@ -465,27 +345,12 @@ export default function Globe({
         ringPropagationSpeed={(d: unknown) => (d as RingData).propagationSpeed}
         ringRepeatPeriod={(d: unknown) => (d as RingData).repeatPeriod}
 
-        pointsData={[...endpoints, ...shipPoint]}
+        pointsData={endpoints}
         pointLat={(d: unknown) => (d as PointData).lat}
         pointLng={(d: unknown) => (d as PointData).lng}
         pointColor={(d: unknown) => (d as PointData).color}
         pointAltitude={(d: unknown) => (d as PointData).altitude}
         pointRadius={(d: unknown) => (d as PointData).radius}
-
-        arcsData={factorArcs}
-        arcStartLat={(d: unknown) => (d as FactorArc).startLat}
-        arcStartLng={(d: unknown) => (d as FactorArc).startLng}
-        arcEndLat={(d: unknown) => (d as FactorArc).endLat}
-        arcEndLng={(d: unknown) => (d as FactorArc).endLng}
-        arcColor={(d: unknown) => {
-          const c = (d as FactorArc).color;
-          return [`${c}cc`, `${c}33`];
-        }}
-        arcStroke={0.4}
-        arcAltitudeAutoScale={0.6}
-        arcDashLength={0.5}
-        arcDashGap={0.4}
-        arcDashAnimateTime={4500}
 
         htmlElementsData={htmlData}
         htmlLat={(d: unknown) => (d as HtmlData).lat}
@@ -502,20 +367,21 @@ export default function Globe({
           {t("数据源 · AIS + POLYMARKET + PORTWATCH", "FEED · AIS + POLYMARKET + PORTWATCH")}
         </div>
       </div>
-      <div className="pointer-events-none absolute bottom-3 left-3 text-[10px] text-faint tracking-widest">
-        <div>{t("◉ 实线 = 按风险着色的计划航线", "◉ Solid = planned route, colored by risk")}</div>
-        <div>{t("◎ 虚线 = 备选航线(可对冲)", "◎ Dashed = alternate route (hedgeable)")}</div>
-        <div>{t("⌒ 弧线 = 市场地理锚点 → 航线", "⌒ Arc = market geo anchor → route")}</div>
+      <div className="pointer-events-none absolute bottom-3 left-3 text-[10px] text-faint tracking-widest space-y-0.5">
+        <div className="flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#7dffb1" }} />
+          <span>{t("起点 · ORIGIN", "ORIGIN")}</span>
+          <span className="text-faint mx-1">·</span>
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#ffb347" }} />
+          <span>{t("终点 · DESTINATION", "DESTINATION")}</span>
+        </div>
+        <div>{t("◉ 卡片 = 实时市场定价的风险事件", "◉ Cards = live, market-priced risk events")}</div>
         <div className="mt-1 flex items-center gap-1">
           <span className="w-2 h-1" style={{ background: probColor(0) }} />
           <span className="w-2 h-1" style={{ background: probColor(0.5) }} />
           <span className="w-2 h-1" style={{ background: probColor(1) }} />
           <span className="text-faint ml-1">{t("低 → 高风险", "low → high risk")}</span>
         </div>
-      </div>
-      <div className="pointer-events-none absolute bottom-3 right-3 text-[10px] text-faint tracking-widest flex items-center gap-2">
-        <span className="w-1.5 h-1.5 rounded-full bg-amber pulse-dot" />{" "}
-        {t("船流速 = 风险反比", "Ship speed = inverse of risk")}
       </div>
     </div>
   );

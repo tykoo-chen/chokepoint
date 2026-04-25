@@ -221,8 +221,8 @@ export default function UploadBox() {
           </span>{" "}
           —{" "}
           {t(
-            "要让 AI 提取真实罚则数, 请同时上传销售合同 (SPA) 或租船合同。只传提单, AI 会用行业基准估值并明确标记。",
-            "to extract a real penalty number, also upload the sale contract (SPA) or charter party. With only a B/L, AI uses an industry baseline estimate and flags it clearly.",
+            "要让 AI 提取真实罚则数, 请同时上传销售合同 (SPA) 或租船合同。",
+            "to extract a real penalty number, also upload the sale contract (SPA) or charter party.",
           )}
         </div>
       </div>
