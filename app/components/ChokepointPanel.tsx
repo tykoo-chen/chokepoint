@@ -78,6 +78,9 @@ export default function ChokepointPanel({
     setExpanded((e) => ({ ...e, [id]: !e[id] }));
   }
 
+  /** Whole-panel collapse toggle. Click header → fold everything. */
+  const [panelOpen, setPanelOpen] = useState(true);
+
   useEffect(() => {
     setProbs((prev) => {
       const next = { ...prev };
@@ -109,9 +112,13 @@ export default function ChokepointPanel({
 
   return (
     <div className="panel-raised flex flex-col">
-      <div className="px-4 py-2.5 border-b border-line flex items-center justify-between">
+      <button
+        type="button"
+        onClick={() => setPanelOpen((o) => !o)}
+        className="w-full px-4 py-2.5 border-b border-line flex items-center justify-between hover:bg-panel-2/40 transition-colors text-left"
+      >
         <div className="label-kicker">/// {t("活跃市场盘口", "LIVE MARKETS")}</div>
-        <div className="text-[10px] text-faint flex items-center gap-1.5">
+        <div className="text-[10px] text-faint flex items-center gap-2">
           {lastFetch ? (
             <>
               <span className="w-1.5 h-1.5 rounded-full bg-green pulse-dot" />
@@ -126,9 +133,14 @@ export default function ChokepointPanel({
               <span className="text-amber-dim">{t("拉取中", "FETCHING")}</span>
             </>
           )}
+          <span className="text-amber text-sm w-3 text-center">
+            {panelOpen ? "▾" : "▸"}
+          </span>
         </div>
-      </div>
+      </button>
 
+      {panelOpen && (
+        <>
       {/* Chokepoint section */}
       <div className="px-4 py-1.5 border-b border-line bg-panel-2/30">
         <div className="text-[9px] text-faint tracking-widest">
@@ -170,6 +182,8 @@ export default function ChokepointPanel({
               />
             ))}
           </div>
+        </>
+      )}
         </>
       )}
     </div>
