@@ -5,6 +5,7 @@ import CoverageViz from "@/app/components/CoverageViz";
 import FactorDecomposition from "@/app/components/FactorDecomposition";
 import Globe from "@/app/components/Globe";
 import HedgeWaterfall from "@/app/components/HedgeWaterfall";
+import LiveMarketsAccordion from "@/app/components/LiveMarketsAccordion";
 import ShipmentPanel from "@/app/components/ShipmentPanel";
 import Ticker from "@/app/components/Ticker";
 import TopBar from "@/app/components/TopBar";
@@ -232,6 +233,13 @@ function MapInner() {
           </div>
         </aside>
       </main>
+
+      {/* Full-width live markets — every chokepoint + factor in the system,
+          collapsible. Default open since this is X-Ray; here is where the
+          full market book belongs. */}
+      <div className="px-5 pb-4">
+        <LiveMarketsAccordion defaultOpen />
+      </div>
 
       {case_.factors && case_.factors.length > 0 && (
         <div className="px-5 pb-4">

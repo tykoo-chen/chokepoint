@@ -349,7 +349,7 @@ export function buildSplit(case_: Case, chokepoints: Chokepoint[], risk: RiskMod
   legs.push({
     id: "fees",
     venue: "Self",
-    instrument: "AIS 数据 · PortWatch · Chokepoint 平台费",
+    instrument: "AIS 数据 · PortWatch · JUSTINCASE 平台费",
     questionZh: "数据源费 + 智能合约 Gas + 平台",
     questionEn: "Data feed + oracle gas + platform overhead",
     side: "Fee",

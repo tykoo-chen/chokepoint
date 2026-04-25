@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CHOKEPOINT — AI Parametric Supply Chain Cover",
+  title: "JUSTINCASE · 万一 — Parametric cover for the day shipping doesn't go to plan",
   description:
-    "AI risk copilot that translates route, chokepoint and prediction-market signal into parametric shipping delay insurance.",
+    "Your cargo's late, we pay anyway. AI risk copilot that turns route, chokepoint and prediction-market signal into a parametric shipping delay policy that pays by timestamp, not by adjuster.",
 };
 
 export default function RootLayout({

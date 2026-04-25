@@ -1,6 +1,7 @@
 "use client";
 import BetBasisBanner from "@/app/components/BetBasisBanner";
 import InsureButton from "@/app/components/InsureButton";
+import LiveMarketsAccordion from "@/app/components/LiveMarketsAccordion";
 import PlainLanguage from "@/app/components/PlainLanguage";
 import ScenarioPanel from "@/app/components/ScenarioPanel";
 import Ticker from "@/app/components/Ticker";
@@ -96,6 +97,12 @@ function QuoteInner() {
             <ScenarioPanel case_={case_} />
           )}
 
+          {/* Live markets — full-width, default-expanded, shows the entire
+              global Polymarket book (chokepoints + factors). Fills the empty
+              middle/left space and reinforces "we're priced live, not by
+              actuarial tables". */}
+          <LiveMarketsAccordion defaultOpen />
+
           {/* Crosslink — fold the X-Ray underneath */}
           <Link
             href={`/map?case=${case_.id}`}
@@ -124,7 +131,7 @@ function QuoteInner() {
       </main>
 
       <footer className="px-5 py-3 border-t border-line text-[10px] text-faint tracking-widest flex items-center justify-between">
-        <div>CHOKEPOINT · {t("演示版本 · 非实际保单", "DEMO build · not a bound policy")}</div>
+        <div>JUSTINCASE · 万一 · {t("演示版本 · 非实际保单", "DEMO build · not a bound policy")}</div>
         <div>{t("数字为模拟 · 仅用于黑客松展示", "Numbers simulated · hackathon showcase only")}</div>
       </footer>
     </div>

@@ -371,7 +371,7 @@ function SplitInner() {
       </main>
 
       <footer className="px-5 py-3 border-t border-line text-[10px] text-faint tracking-widest flex items-center justify-between">
-        <div>CHOKEPOINT · {t("拆单执行层 · DEMO", "EXECUTION LAYER · DEMO")}</div>
+        <div>JUSTINCASE · 万一 · {t("拆单执行层 · DEMO", "EXECUTION LAYER · DEMO")}</div>
         <div>
           {t(
             "所有下单为模拟 · 不构成投资建议",

@@ -31,10 +31,11 @@ export default function TopBar({ screen, threat = 3 }: { screen: string; threat?
   return (
     <div className="relative z-10 border-b border-line bg-panel/80 backdrop-blur">
       <div className="flex items-center gap-6 px-5 py-2.5 text-[11px]">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-amber pulse-dot" />
-          <span className="text-amber tracking-[0.3em] font-semibold">CHOKEPOINT</span>
-          <span className="text-faint">v0.1 · demo</span>
+        <div className="flex items-baseline gap-2">
+          <div className="w-2 h-2 rounded-full bg-amber pulse-dot self-center" />
+          <span className="text-amber tracking-[0.3em] font-semibold">JUSTINCASE</span>
+          <span className="text-amber-dim text-[12px] font-medium">万一</span>
+          <span className="text-faint text-[10px]">v0.1 · demo</span>
         </div>
         <div className="hidden md:flex items-center gap-1 text-faint">
           <span>{t("页面", "SCREEN")}</span>

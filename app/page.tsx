@@ -15,6 +15,13 @@ export default function Home() {
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-10 flex flex-col gap-8">
         <section className="flex flex-col gap-3 pt-4">
+          <div className="flex items-baseline gap-3 flex-wrap">
+            <span className="text-amber tracking-[0.3em] font-semibold text-[14px]">JUSTINCASE</span>
+            <span className="text-amber-dim text-[14px] font-medium">万一</span>
+            <span className="text-faint text-[10px] tracking-widest">
+              · {t("货晚了, 我们照赔", "your cargo's late, we pay anyway")}
+            </span>
+          </div>
           <div className="label-kicker">
             /// {t(
               "给跨境进口商 / 项目部署商的参数化延迟保障",
@@ -112,7 +119,7 @@ export default function Home() {
 
         <footer className="pt-6 pb-8 border-t border-line text-[10px] text-faint tracking-widest flex items-center justify-between">
           <div>
-            CHOKEPOINT · {t("参数化航运延迟保障 · DEMO MODE · 模拟数据", "Parametric shipping delay cover · DEMO MODE · mock data")}
+            JUSTINCASE · 万一 · {t("DEMO MODE · 模拟数据", "DEMO MODE · mock data")}
           </div>
           <div>BUILT FOR TRACK 3 · GLOBAL PRODUCTS</div>
         </footer>

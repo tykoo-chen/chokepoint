@@ -92,7 +92,7 @@ export default function InsureButton({
       </div>
 
       <div className="mt-3 text-[10px] text-faint text-center tracking-widest">
-        {t("承保 · CHOKEPOINT RE · LLOYD'S 辛迪加 4812", "Underwritten by CHOKEPOINT RE · Lloyd's Syndicate 4812")}
+        {t("承保 · JUSTINCASE RE · LLOYD'S 辛迪加 4812", "Underwritten by JUSTINCASE RE · Lloyd's Syndicate 4812")}
       </div>
     </div>
   );
