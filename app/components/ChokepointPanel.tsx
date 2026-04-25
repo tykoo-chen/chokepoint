@@ -111,11 +111,11 @@ export default function ChokepointPanel({
   }, [chokepoints, factors]);
 
   return (
-    <div className="panel-raised flex flex-col">
+    <div className="panel-raised flex flex-col lg:max-h-[440px]">
       <button
         type="button"
         onClick={() => setPanelOpen((o) => !o)}
-        className="w-full px-4 py-2.5 border-b border-line flex items-center justify-between hover:bg-panel-2/40 transition-colors text-left"
+        className="w-full px-4 py-2.5 border-b border-line flex items-center justify-between hover:bg-panel-2/40 transition-colors text-left flex-shrink-0"
       >
         <div className="label-kicker">/// {t("活跃市场盘口", "LIVE MARKETS")}</div>
         <div className="text-[10px] text-faint flex items-center gap-2">
@@ -140,51 +140,51 @@ export default function ChokepointPanel({
       </button>
 
       {panelOpen && (
-        <>
-      {/* Chokepoint section */}
-      <div className="px-4 py-1.5 border-b border-line bg-panel-2/30">
-        <div className="text-[9px] text-faint tracking-widest">
-          ▣ {t("海峡 / 通道", "STRAITS / CANALS")} · {chokepoints.length}
-        </div>
-      </div>
-      <div className="flex flex-col">
-        {chokepoints.map((c) => (
-          <ChokepointRow
-            key={c.id}
-            c={c}
-            p={probs[c.id] ?? c.probability}
-            lang={lang}
-            liveInfo={c.polymarketSlug ? live[c.polymarketSlug] : undefined}
-            isExpanded={!!expanded[c.id]}
-            onToggle={() => toggle(c.id)}
-          />
-        ))}
-      </div>
-
-      {/* Factor section (only render if any factors present) */}
-      {factors.length > 0 && (
-        <>
-          <div className="px-4 py-1.5 border-b border-line bg-panel-2/30">
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          {/* Chokepoint section */}
+          <div className="px-4 py-1.5 border-b border-line bg-panel-2/30 sticky top-0 z-10">
             <div className="text-[9px] text-faint tracking-widest">
-              {t("✦ 其他风险因子", "✦ OTHER RISK FACTORS")} · {factors.length}
+              ▣ {t("海峡 / 通道", "STRAITS / CANALS")} · {chokepoints.length}
             </div>
           </div>
           <div className="flex flex-col">
-            {factors.map((f) => (
-              <FactorRow
-                key={f.id}
-                f={f}
-                p={probs[f.id] ?? f.probability}
+            {chokepoints.map((c) => (
+              <ChokepointRow
+                key={c.id}
+                c={c}
+                p={probs[c.id] ?? c.probability}
                 lang={lang}
-                liveInfo={live[f.polymarketSlug]}
-                isExpanded={!!expanded[f.id]}
-                onToggle={() => toggle(f.id)}
+                liveInfo={c.polymarketSlug ? live[c.polymarketSlug] : undefined}
+                isExpanded={!!expanded[c.id]}
+                onToggle={() => toggle(c.id)}
               />
             ))}
           </div>
-        </>
-      )}
-        </>
+
+          {/* Factor section (only render if any factors present) */}
+          {factors.length > 0 && (
+            <>
+              <div className="px-4 py-1.5 border-b border-line bg-panel-2/30 sticky top-0 z-10">
+                <div className="text-[9px] text-faint tracking-widest">
+                  {t("✦ 其他风险因子", "✦ OTHER RISK FACTORS")} · {factors.length}
+                </div>
+              </div>
+              <div className="flex flex-col">
+                {factors.map((f) => (
+                  <FactorRow
+                    key={f.id}
+                    f={f}
+                    p={probs[f.id] ?? f.probability}
+                    lang={lang}
+                    liveInfo={live[f.polymarketSlug]}
+                    isExpanded={!!expanded[f.id]}
+                    onToggle={() => toggle(f.id)}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       )}
     </div>
   );
