@@ -3,6 +3,7 @@ import { buildDynamicCase, saveDynamicCase } from "@/app/lib/dynamicCase";
 import { readLangSync, useT } from "@/app/lib/i18n";
 import type { DecomposeResult, Shipment } from "@/app/lib/schemas";
 import { useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 type DocType =
@@ -70,6 +71,99 @@ function stepLabels(t: (zh: string, en: string) => string): Record<StepKey, { la
   };
 }
 
+/** Agent connector definitions for the enterprise-data input lane. */
+type AgentConnector = {
+  id: string;
+  labelZh: string;
+  labelEn: string;
+  glyph: string;
+  detailZh: string;
+  detailEn: string;
+};
+const AGENT_CONNECTORS: AgentConnector[] = [
+  {
+    id: "claude-code",
+    labelZh: "Claude Code · MCP",
+    labelEn: "Claude Code · MCP",
+    glyph: "◆",
+    detailZh: "你企业的 Claude Code 工作台 · 直读所有合同 / ERP / 项目台账",
+    detailEn: "Your enterprise Claude Code workspace · reads contracts / ERP / project ledger",
+  },
+  {
+    id: "opencloud",
+    labelZh: "Open Cloud · Anthropic",
+    labelEn: "Open Cloud · Anthropic",
+    glyph: "☁",
+    detailZh: "Anthropic Open Cloud 企业接口 · 业务模型 + 知识库",
+    detailEn: "Anthropic Open Cloud enterprise endpoint · business models + knowledge base",
+  },
+  {
+    id: "erp",
+    labelZh: "ERP · SAP / Oracle / 用友 / 金蝶",
+    labelEn: "ERP · SAP / Oracle / 用友 / 金蝶",
+    glyph: "▤",
+    detailZh: "在途订单 + 库存 + 应付应收",
+    detailEn: "In-transit orders + inventory + payables/receivables",
+  },
+  {
+    id: "clm",
+    labelZh: "合同管理 · CLM",
+    labelEn: "CLM · DocuSign / Ironclad",
+    glyph: "⚖",
+    detailZh: "DocuSign · Ironclad · 法大大 · 提取 LD 条款",
+    detailEn: "DocuSign · Ironclad · 法大大 · extract LD clauses",
+  },
+  {
+    id: "ops",
+    labelZh: "ops 财务模型",
+    labelEn: "Ops finance model",
+    glyph: "📉",
+    detailZh: "你团队上次更新的「晚 1 天损失多少」表",
+    detailEn: "Your team's most recent 'cost-per-day-late' spreadsheet",
+  },
+  {
+    id: "custom",
+    labelZh: "自建企业 Agent · MCP server",
+    labelEn: "Custom enterprise Agent · MCP server",
+    glyph: "▣",
+    detailZh: "你自己写的 MCP server · 完全私域",
+    detailEn: "Your own MCP server · fully private",
+  },
+];
+
+/** Mock recommendations the connected Agent surfaces. Real-world this would
+ * come from the Agent's call tools; here we hard-link to our 3 demo cases. */
+type AgentRec = {
+  caseId: string;
+  titleZh: string;
+  titleEn: string;
+  cargoValue: string;
+  disruptionPct: string;
+};
+const AGENT_RECOMMENDATIONS: AgentRec[] = [
+  {
+    caseId: "saudi-crude-yantai",
+    titleZh: "沙特原油 → 中石化烟台炼厂",
+    titleEn: "Saudi crude → Sinopec Yantai refinery",
+    cargoValue: "$128M",
+    disruptionPct: "84.5%",
+  },
+  {
+    caseId: "tsingtao-felixstowe",
+    titleZh: "青岛啤酒 → 英国 Felixstowe",
+    titleEn: "Tsingtao beer → UK Felixstowe",
+    cargoValue: "£480K",
+    disruptionPct: "52.1%",
+  },
+  {
+    caseId: "xbot-heathrow",
+    titleZh: "XBOT 清洁机器人 → 伦敦希思罗 T5",
+    titleEn: "XBOT cleaning robots → London Heathrow T5",
+    cargoValue: "£850K",
+    disruptionPct: "68.3%",
+  },
+];
+
 export default function UploadBox() {
   const t = useT();
   const labels = stepLabels(t);
@@ -79,8 +173,12 @@ export default function UploadBox() {
   const [stepIdx, setStepIdx] = useState(-1);
   const [error, setError] = useState<string | null>(null);
   const [callLog, setCallLog] = useState<string[]>([]);
+  /** Which Agent connectors the user has "connected" (mocked). */
+  const [connected, setConnected] = useState<Record<string, boolean>>({});
   const inputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
+  const connectedCount = Object.values(connected).filter(Boolean).length;
+  const isAgentMode = connectedCount > 0;
 
   function advance(to: StepKey) {
     setStepIdx(ORDER.indexOf(to));
@@ -202,11 +300,135 @@ export default function UploadBox() {
     }
   }
 
+  function toggleConnector(id: string) {
+    setConnected((prev) => ({ ...prev, [id]: !prev[id] }));
+  }
+
   return (
     <div className="panel-raised p-6 flex flex-col gap-4">
+      {/* === Lane A · Enterprise Agent connection ============================ */}
+      <div className="border border-amber-dim/50 bg-amber/5 rounded-sm p-4 flex flex-col gap-3">
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <div className="label-kicker text-amber">
+              /// {t("企业 Agent 接入 · 推荐主路径", "ENTERPRISE AGENT CONNECT · recommended")}
+            </div>
+            <div className="text-[12px] text-dim mt-1 leading-relaxed max-w-2xl">
+              {t(
+                "把你企业的 Agent 接进来 (Claude Code MCP / Open Cloud / 自建 MCP server), JUSTINCASE 直接读 ERP / 合同 / 项目台账 / ops 模型。不再需要一份份上传 PDF — 你今天该买哪几票保单, AI 自己告诉你。",
+                "Connect your enterprise Agent (Claude Code MCP / Open Cloud / your own MCP server). JUSTINCASE reads ERP / contracts / project ledgers / ops models directly. No more one-PDF-at-a-time — the Agent surfaces today's policy candidates for you.",
+              )}
+            </div>
+          </div>
+          <div className="text-[10px] text-faint tracking-widest text-right whitespace-nowrap">
+            {isAgentMode ? (
+              <span className="text-green">
+                ● {t(`已连接 ${connectedCount} 路`, `${connectedCount} CONNECTED`)}
+              </span>
+            ) : (
+              <span className="text-amber-dim">
+                ○ {t("未连接 · 演示用", "NOT CONNECTED · demo mode")}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Connector grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+          {AGENT_CONNECTORS.map((c) => {
+            const on = !!connected[c.id];
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => toggleConnector(c.id)}
+                className={`text-left px-3 py-2.5 border rounded-sm transition-colors text-[11px] flex items-start gap-2 ${
+                  on
+                    ? "border-green bg-green/10"
+                    : "border-line bg-panel-2/40 hover:border-amber-dim"
+                }`}
+              >
+                <span className={`text-base mt-0.5 ${on ? "text-green" : "text-amber-dim"}`}>
+                  {c.glyph}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className={`${on ? "text-green" : "text-text"} font-medium truncate`}>
+                      {t(c.labelZh, c.labelEn)}
+                    </span>
+                    <span
+                      className={`text-[9px] tracking-widest ${on ? "text-green" : "text-faint"}`}
+                    >
+                      {on ? t("● 已连", "● ON") : t("○ 接入", "○ CONNECT")}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-faint leading-snug mt-0.5">
+                    {t(c.detailZh, c.detailEn)}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Once at least one connector is on, show the Agent's "today's pick" */}
+        {isAgentMode && (
+          <div className="border-t border-amber-dim/40 pt-3 flex flex-col gap-2">
+            <div className="flex items-baseline justify-between flex-wrap gap-2">
+              <div className="text-[11px] text-text">
+                <span className="text-amber-dim tracking-widest">
+                  {t("AGENT 已读取 · ", "AGENT HAS READ · ")}
+                </span>
+                <span className="text-amber tabular-nums">23</span>{" "}
+                {t("票活动航次", "active voyages")}
+                <span className="text-faint mx-1">·</span>
+                <span className="text-amber tabular-nums">47</span>{" "}
+                {t("份合同", "contracts")}
+                <span className="text-faint">{" "}({t("12 含 LD", "12 with LD")})</span>
+                <span className="text-faint mx-1">·</span>
+                <span className="text-amber tabular-nums">8</span>{" "}
+                {t("个项目 go-live", "project go-lives")}
+              </div>
+              <div className="text-[10px] text-faint">
+                {t("Agent 上次同步 · 5 分钟前", "Agent last sync · 5 min ago")}
+              </div>
+            </div>
+            <div className="text-[11px] text-amber-dim tracking-widest">
+              ↓ {t("AI 今天发现值得上保单的 3 票", "AI flagged 3 voyages worth covering today")}
+            </div>
+            <div className="flex flex-col gap-1">
+              {AGENT_RECOMMENDATIONS.map((r, idx) => (
+                <Link
+                  key={r.caseId}
+                  href={`/map?case=${r.caseId}`}
+                  className="group flex items-center gap-3 px-3 py-2 border border-line bg-panel/60 hover:border-amber transition-colors text-[11px]"
+                >
+                  <span className="text-amber-dim tabular-nums w-7">[0{idx + 1}]</span>
+                  <span className="flex-1 text-text truncate">
+                    {t(r.titleZh, r.titleEn)}
+                  </span>
+                  <span className="text-amber tabular-nums">{r.cargoValue}</span>
+                  <span className="text-amber-dim text-[10px]">·</span>
+                  <span className="text-amber tabular-nums">
+                    {t("出事 ", "trip ")}
+                    {r.disruptionPct}
+                  </span>
+                  <span className="text-amber group-hover:text-amber-bright tracking-widest">
+                    →
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* === Lane B · Manual file upload (fallback) ========================== */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <div className="label-kicker">{t("上传 · 多文档支持", "UPLOAD · Multi-document")}</div>
+          <div className="label-kicker">
+            {t("或者 · 上传单个文件 (备用通道)", "OR · upload a single file (fallback)")}
+          </div>
           <div className="text-sm text-dim mt-1">
             {t(
               "真实 Claude Opus 4.7 视觉提取 + Polymarket 搜索拆解",
