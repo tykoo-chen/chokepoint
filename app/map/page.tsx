@@ -146,7 +146,13 @@ function MapInner() {
               <span className="text-amber">{t("刷新 · 1.4s", "REFRESH · 1.4s")}</span>
             </div>
           </div>
-          <Globe case_={case_} chokepoints={chokepoints} focus={focus} height={620} />
+          <Globe
+            case_={case_}
+            chokepoints={chokepoints}
+            factors={case_.factors}
+            focus={focus}
+            height={620}
+          />
           <div className="absolute top-12 right-4 panel p-3 min-w-[180px]">
             <div className="label-kicker mb-1">{t("综合扰动概率", "COMBINED DISRUPTION")}</div>
             <div className="text-2xl text-amber tabular-nums">

@@ -38,6 +38,11 @@ export type Factor = {
   rationaleZh: string; // why this particular shipment is exposed to this factor
   rationaleEn?: string;
   severity: "low" | "med" | "high" | "critical";
+  // Geographic anchor — where this market's "real-world subject" sits.
+  // Used to plot the factor on the globe alongside chokepoints.
+  lat?: number;
+  lng?: number;
+  geoLabel?: string;
   // live-refreshed
   probability: number;
   volume24h: number;
@@ -264,6 +269,9 @@ export const CASES: Case[] = [
         severity: "med",
         probability: 0.068,
         volume24h: 180,
+        lat: 25.5,
+        lng: -90.0,
+        geoLabel: "Gulf of Mexico",
       },
       {
         id: "price-wti-atl",
@@ -279,6 +287,9 @@ export const CASES: Case[] = [
         severity: "med",
         probability: 0.012,
         volume24h: 123_000,
+        lat: 35.97,
+        lng: -96.77,
+        geoLabel: "Cushing, OK · WTI",
       },
       {
         id: "policy-ru-ukr",
@@ -294,6 +305,9 @@ export const CASES: Case[] = [
         severity: "high",
         probability: 0.0415,
         volume24h: 97_000,
+        lat: 50.45,
+        lng: 30.52,
+        geoLabel: "Kyiv",
       },
       {
         id: "macro-fed-jun",
@@ -309,6 +323,9 @@ export const CASES: Case[] = [
         severity: "med",
         probability: 0.835,
         volume24h: 524_000,
+        lat: 38.9,
+        lng: -77.04,
+        geoLabel: "Washington DC · Fed",
       },
     ],
     ship: "VLCC SEAWAYS CAPTAIN / IMO 9821144",
@@ -333,64 +350,6 @@ export const CASES: Case[] = [
       { label: "Polymarket · US hurricane by May 31", url: "https://polymarket.com/event/will-a-hurricane-make-landfall-in-the-us-by-may-31" },
       { label: "Polymarket · Russia-Ukraine ceasefire by May", url: "https://polymarket.com/event/russia-x-ukraine-ceasefire-by-may-31-2026" },
       { label: "Polymarket · Hormuz by May 15", url: "https://polymarket.com/event/strait-of-hormuz-traffic-returns-to-normal-by-may-15" },
-    ],
-  },
-  {
-    id: "xbot-jebelali",
-    title: "XBOT 服务机器人 → 迪拜 · 霍尔木兹直击",
-    titleEn: "XBOT service robots → Dubai · Hormuz direct hit",
-    subtitle: "REAL · APR 2026 · SZX → JEBEL ALI",
-    cargo: "XBOT 服务 / 清洁机器人 · 40 台 + 安装包",
-    cargoEn: "XBOT service & cleaning robots · 40 units + commissioning kit",
-    hsCode: "8479.89",
-    cargoValueUsd: 1_520_000, // ~£1.2M
-    currency: "GBP",
-    quantity: "40 台 · 2 x 40ft HC",
-    origin: { lat: 22.54, lng: 114.06, name: "Shenzhen, CN" },
-    destination: { lat: 25.01, lng: 55.06, name: "Jebel Ali, UAE" },
-    waypoints: [
-      { lat: 22.54, lng: 114.06 },
-      { lat: 2.5, lng: 101.4, name: "Malacca" },
-      { lat: 15.0, lng: 72.0 },
-      { lat: 26.57, lng: 56.25, name: "Hormuz" },
-      { lat: 25.01, lng: 55.06 },
-    ],
-    altRoute: [
-      { lat: 22.54, lng: 114.06 },
-      { lat: 2.5, lng: 101.4, name: "Malacca" },
-      { lat: 12.58, lng: 43.33, name: "Bab el-Mandeb" },
-      { lat: 24.0, lng: 38.0, name: "Jeddah trans-ship" },
-      { lat: 22.0, lng: 52.0, name: "陆路经沙特 → UAE" },
-      { lat: 25.01, lng: 55.06 },
-    ],
-    altRouteLabel: "改走 Jeddah 转沙特陆运 (+11d, 需 ATA 文件 + 保税过境)",
-    altRouteLabelEn: "Re-route via Jeddah + Saudi land bridge (+11d, requires ATA carnet + bonded transit)",
-    baselineTransitDays: 22,
-    bufferDays: 4,
-    contractPenaltyPerDayUsd: 190_000, // ~£150K/d client LD
-    chokepointIds: ["HORMUZ", "BAB_EL_MANDEB", "MALACCA"],
-    ship: "MSC KIRA / IMO 9751332",
-    etd: "2026-04-24",
-    eta: "2026-05-16",
-    incoterms: "DAP Jebel Ali",
-    buyer: "Majid Al Futtaim · Mall of the Emirates 扩建店",
-    buyerEn: "Majid Al Futtaim · Mall of the Emirates expansion",
-    documentLabel: "House B/L · SZX-JEA-88104",
-    clientZh: "LEC Robotics · 中东扩张项目",
-    clientEn: "LEC Robotics · Middle East expansion programme",
-    painPointZh:
-      "中东购物节启用日期合同锁死, 晚 1 天罚款 £150K + 40 位工程师窝工 + 客户启用仪式推迟。",
-    painPointEn:
-      "Mall opening date is contract-locked to the regional shopping festival. Each day late = £150K liquidated damages + 40 idle engineers + customer launch ceremony postponed.",
-    realContext:
-      "2026-04-24 实况:美伊战事第 55 天, 霍尔木兹海峡自 2 月 28 日起基本关闭, 4 月 19 日仅 3 艘船通行; Polymarket 显示 5 月 31 日前恢复正常概率仅 33%。Jebel Ali 进港都必须过这道海峡 — 这是 LEC 机器人业务扩张到中东的最硬约束。",
-    realContextEn:
-      "April 24, 2026 — Day 55 of the US-Iran war. Strait of Hormuz effectively closed since Feb 28; only 3 vessels transited on April 19. Polymarket prices the chance of normal traffic by May 31 at 33%. Every Jebel Ali call must transit this chokepoint — the hardest single constraint on LEC's Middle East expansion.",
-    sources: [
-      { label: "CNBC · Hormuz 基本关闭", url: "https://www.cnbc.com/2026/04/22/iran-war-strait-hormuz-tanker-ship-trump-blockade.html" },
-      { label: "Polymarket · Hormuz 5/15 前恢复", url: "https://polymarket.com/event/strait-of-hormuz-traffic-returns-to-normal-by-may-15" },
-      { label: "Al Jazeera · 伊朗再关海峡", url: "https://www.aljazeera.com/news/2026/4/18/iran-closes-strait-of-hormuz-again-over-us-blockade-of-its-ports" },
-      { label: "Kalshi · Hormuz 7 月前恢复", url: "https://www.cnbc.com/2026/04/23/kalshi-bettors-see-strait-of-hormuz-traffic-normal-by-july.html" },
     ],
   },
   {

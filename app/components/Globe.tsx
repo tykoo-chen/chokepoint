@@ -1,5 +1,5 @@
 "use client";
-import { Case, Chokepoint } from "@/app/lib/cases";
+import { Case, Chokepoint, Factor } from "@/app/lib/cases";
 import { useLang, useT } from "@/app/lib/i18n";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -19,7 +19,37 @@ type RingData = { lat: number; lng: number; color: string; maxRadius: number; pr
 
 type PointData = { lat: number; lng: number; color: string; radius: number; altitude: number };
 
-type HtmlData = { lat: number; lng: number; chokepoint: Chokepoint; live: number };
+type HtmlData =
+  | { kind: "chokepoint"; lat: number; lng: number; chokepoint: Chokepoint; live: number }
+  | { kind: "factor"; lat: number; lng: number; factor: Factor };
+
+const FACTOR_COLOR: Record<Factor["category"], string> = {
+  weather: "#7dffb1",
+  price: "#ffb347",
+  policy: "#c084fc",
+  macro: "#4fc3f7",
+};
+
+const FACTOR_ICON: Record<Factor["category"], string> = {
+  weather: "🌀",
+  price: "Ξ",
+  policy: "⚖",
+  macro: "📉",
+};
+
+const FACTOR_LABEL_EN: Record<Factor["category"], string> = {
+  weather: "WEATHER",
+  price: "PRICE",
+  policy: "POLICY",
+  macro: "MACRO",
+};
+
+const FACTOR_LABEL_ZH: Record<Factor["category"], string> = {
+  weather: "天气",
+  price: "价格",
+  policy: "政策",
+  macro: "宏观",
+};
 
 function severityColor(s: Chokepoint["severity"]): string {
   switch (s) {
@@ -77,6 +107,39 @@ function probAtPoint(
 function buildHtml(d: HtmlData, lang: "zh" | "en"): HTMLElement {
   const el = document.createElement("div");
   el.className = "globe-marker";
+
+  if (d.kind === "factor") {
+    const f = d.factor;
+    const color = FACTOR_COLOR[f.category];
+    const icon = FACTOR_ICON[f.category];
+    const catLabel = lang === "en" ? FACTOR_LABEL_EN[f.category] : FACTOR_LABEL_ZH[f.category];
+    const label = lang === "en" ? f.labelEn ?? f.labelZh : f.labelZh;
+    const question = lang === "en" ? f.marketQuestionEn ?? f.marketQuestionZh : f.marketQuestionZh;
+    const geo = f.geoLabel ?? "";
+    const pct = (f.probability * 100).toFixed(1);
+    const liveLabel = lang === "en" ? "● LIVE" : "● 实时";
+
+    el.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;pointer-events:none;font-family:var(--font-geist-mono),ui-monospace,Menlo,monospace;">
+        <div style="width:1px;height:32px;background:linear-gradient(to bottom, ${color}, transparent);"></div>
+        <div style="min-width:140px;padding:5px 7px;background:rgba(11,15,20,0.92);border:1px solid ${color}cc;box-shadow:0 0 14px ${color}44;color:#d6dde6;">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:9px;letter-spacing:0.15em;color:#7b8896;">
+            <span style="color:${color};">${icon} ${catLabel}</span>
+            <span style="color:#7b8896;">${geo}</span>
+          </div>
+          <div style="font-size:10px;color:#d6dde6;margin-top:1px;">${label}</div>
+          <div style="display:flex;align-items:baseline;gap:6px;margin-top:3px;">
+            <span style="font-size:15px;font-weight:600;color:${color};font-variant-numeric:tabular-nums;">${pct}%</span>
+            <span style="font-size:8px;color:#7b8896;">Polymarket</span>
+          </div>
+          <div style="font-size:8px;color:#7b8896;margin-top:2px;line-height:1.3;">${question}</div>
+          <div style="font-size:8px;color:#7dffb1;margin-top:3px;border-top:1px solid #1a2430;padding-top:2px;">${liveLabel}</div>
+        </div>
+      </div>
+    `;
+    return el;
+  }
+
   const pct = (d.live * 100).toFixed(1);
   const sev = severityColor(d.chokepoint.severity);
   const sevLabel =
@@ -168,11 +231,13 @@ function buildDayNightMaterial(): THREE.ShaderMaterial {
 export default function Globe({
   case_,
   chokepoints,
+  factors,
   focus,
   height = 560,
 }: {
   case_: Case;
   chokepoints: Chokepoint[];
+  factors?: Factor[];
   focus?: { lat: number; lng: number; altitude?: number };
   height?: number;
 }) {
@@ -314,11 +379,52 @@ export default function Globe({
     { lat: shipPos.lat, lng: shipPos.lng, color: probColor(peakProb), radius: 0.45, altitude: 0.025 },
   ];
 
-  const htmlData: HtmlData[] = chokepoints.map((c) => ({
-    lat: c.lat,
-    lng: c.lng,
-    chokepoint: c,
-    live: live[c.id] ?? c.probability,
+  const factorsWithGeo = (factors ?? []).filter(
+    (f): f is Factor & { lat: number; lng: number } =>
+      typeof f.lat === "number" && typeof f.lng === "number",
+  );
+
+  const htmlData: HtmlData[] = [
+    ...chokepoints.map((c) => ({
+      kind: "chokepoint" as const,
+      lat: c.lat,
+      lng: c.lng,
+      chokepoint: c,
+      live: live[c.id] ?? c.probability,
+    })),
+    ...factorsWithGeo.map((f) => ({
+      kind: "factor" as const,
+      lat: f.lat,
+      lng: f.lng,
+      factor: f,
+    })),
+  ];
+
+  // Route centroid — used to anchor connector arcs from off-route market markers.
+  const routeCentroid = useMemo(() => {
+    const wp = case_.waypoints;
+    let lat = 0,
+      lng = 0;
+    for (const p of wp) {
+      lat += p.lat;
+      lng += p.lng;
+    }
+    return { lat: lat / wp.length, lng: lng / wp.length };
+  }, [case_.waypoints]);
+
+  type FactorArc = {
+    startLat: number;
+    startLng: number;
+    endLat: number;
+    endLng: number;
+    color: string;
+  };
+  const factorArcs: FactorArc[] = factorsWithGeo.map((f) => ({
+    startLat: f.lat,
+    startLng: f.lng,
+    endLat: routeCentroid.lat,
+    endLng: routeCentroid.lng,
+    color: FACTOR_COLOR[f.category],
   }));
 
   return (
@@ -366,6 +472,21 @@ export default function Globe({
         pointAltitude={(d: unknown) => (d as PointData).altitude}
         pointRadius={(d: unknown) => (d as PointData).radius}
 
+        arcsData={factorArcs}
+        arcStartLat={(d: unknown) => (d as FactorArc).startLat}
+        arcStartLng={(d: unknown) => (d as FactorArc).startLng}
+        arcEndLat={(d: unknown) => (d as FactorArc).endLat}
+        arcEndLng={(d: unknown) => (d as FactorArc).endLng}
+        arcColor={(d: unknown) => {
+          const c = (d as FactorArc).color;
+          return [`${c}cc`, `${c}33`];
+        }}
+        arcStroke={0.4}
+        arcAltitudeAutoScale={0.6}
+        arcDashLength={0.5}
+        arcDashGap={0.4}
+        arcDashAnimateTime={4500}
+
         htmlElementsData={htmlData}
         htmlLat={(d: unknown) => (d as HtmlData).lat}
         htmlLng={(d: unknown) => (d as HtmlData).lng}
@@ -384,6 +505,7 @@ export default function Globe({
       <div className="pointer-events-none absolute bottom-3 left-3 text-[10px] text-faint tracking-widest">
         <div>{t("◉ 实线 = 按风险着色的计划航线", "◉ Solid = planned route, colored by risk")}</div>
         <div>{t("◎ 虚线 = 备选航线(可对冲)", "◎ Dashed = alternate route (hedgeable)")}</div>
+        <div>{t("⌒ 弧线 = 市场地理锚点 → 航线", "⌒ Arc = market geo anchor → route")}</div>
         <div className="mt-1 flex items-center gap-1">
           <span className="w-2 h-1" style={{ background: probColor(0) }} />
           <span className="w-2 h-1" style={{ background: probColor(0.5) }} />

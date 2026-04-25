@@ -294,11 +294,12 @@ export default function UploadBox() {
       {!busy && pending.length > 0 && (
         <button
           onClick={() => runRealPipeline(false)}
-          className="btn-amber w-full py-3 text-sm tracking-[0.3em]"
+          className="btn-amber w-full py-3 text-sm"
+          style={{ letterSpacing: "0.2em" }}
         >
           {t(
             `▸ 提取并拆解 · ${pending.length} 份文件`,
-            `▸ EXTRACT & DECOMPOSE · ${pending.length} ${pending.length === 1 ? "file" : "files"}`,
+            `▸ EXTRACT · ${pending.length} ${pending.length === 1 ? "FILE" : "FILES"}`,
           )}
         </button>
       )}

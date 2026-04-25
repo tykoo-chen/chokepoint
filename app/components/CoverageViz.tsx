@@ -168,6 +168,59 @@ export default function CoverageViz({ case_, risk }: { case_: Case; risk: RiskMo
           </div>
         </div>
       </div>
+
+      {/* Plain-language explanation */}
+      <div className="border-t border-line px-4 py-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] leading-relaxed">
+        <div>
+          <div className="label-kicker text-amber-dim mb-1.5">
+            {t("/// 这张图在说什么", "/// WHAT THIS CHART MEANS")}
+          </div>
+          <p className="text-dim">
+            {t(
+              "横轴 = 比合同 ETA 晚多少天。竖轴 = 这种延迟程度发生的概率。整条曲线由过去 842 次同类航次拟合而成 (lognormal, 厚右尾)。",
+              "X-axis = days late vs. contract ETA. Y-axis = probability density of that level of delay. The whole curve is fit from 842 past comparable voyages (lognormal, fat right tail).",
+            )}
+          </p>
+          <p className="text-dim mt-2">
+            {t(
+              "曲线越往右越厚, 意味着你更可能晚很多 — 而不是只晚一点点。这就是为什么「光看 P50」会严重低估真实风险。",
+              "The fatter the right tail, the more likely you'll be very late — not just a little late. This is why looking only at P50 dangerously understates real risk.",
+            )}
+          </p>
+        </div>
+
+        <div>
+          <div className="label-kicker text-amber-dim mb-1.5">
+            {t("/// 怎么读这些标记", "/// HOW TO READ THE MARKERS")}
+          </div>
+          <ul className="space-y-1.5 text-dim">
+            <li>
+              <span className="text-green font-semibold">{t("绿色虚线 BUFFER", "Green dashed BUFFER")}</span>
+              {" — "}
+              {t(
+                `买方有 ${case_.bufferDays} 天库存兜底, 这条线左边你自己消化, 这条线右边就开始触发我们的赔付。`,
+                `The buyer has ${case_.bufferDays} days of inventory before stockout. Left of this line you absorb the delay yourself; right of it our payouts start firing.`,
+              )}
+            </li>
+            <li>
+              <span className="text-amber font-semibold">{t("琥珀竖线 T1 / T2 / T3", "Amber lines T1 / T2 / T3")}</span>
+              {" — "}
+              {t(
+                "10 天 / 20 天 / 30 天三档触发器, 每档对应一次自动赔付 (每档赔付递增, 30 天封顶)。",
+                "Three triggers at 10 / 20 / 30 days late. Each fires an automatic payout, escalating up to the policy limit at 30 days.",
+              )}
+            </li>
+            <li>
+              <span className="text-dim font-semibold">P50 / P90 / P99</span>
+              {" — "}
+              {t(
+                "概率分位数。P50 = 一半概率你到这天就到了 (中位数);  P90 = 只有 10% 概率比这还晚;  P99 = 极尾, 只有 1% 概率比这还晚 — 这是我们必须能承受的最坏情况。",
+                "Probability percentiles. P50 = median (50/50); P90 = only 10% chance you'll be later; P99 = the deep tail (1%) — the worst case we must still pay.",
+              )}
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }

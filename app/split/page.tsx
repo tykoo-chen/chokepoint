@@ -97,6 +97,51 @@ function SplitInner() {
         </div>
       </div>
 
+      {/* Big "what just happened" intro */}
+      <div className="mx-5 mt-3 panel-raised border-amber-dim p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="w-2 h-2 rounded-full bg-amber pulse-dot" />
+          <div className="label-kicker text-amber">
+            /// {t("刚刚发生了什么", "WHAT JUST HAPPENED")}
+          </div>
+        </div>
+        <p className="text-[12px] text-dim leading-relaxed">
+          {t(
+            "你点了「一键投保」。后台 (没有人工)马上做了三件事:",
+            "You hit One-Click Insure. The system did three things in the background, with no human in the loop:",
+          )}
+        </p>
+        <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2 text-[11px]">
+          <div className="panel p-2.5">
+            <div className="text-amber tracking-widest text-[9px]">①  PRICE</div>
+            <div className="text-dim mt-1">
+              {t(
+                "锁定保费金额, 写一份合规保单 (受 Lloyd's 辛迪加 4812 承保)。",
+                "Premium locked, a regulatory-compliant policy was issued (underwritten by Lloyd's Syndicate 4812).",
+              )}
+            </div>
+          </div>
+          <div className="panel p-2.5">
+            <div className="text-amber tracking-widest text-[9px]">②  SPLIT</div>
+            <div className="text-dim mt-1">
+              {t(
+                `把保费拆成 ${legs.length} 笔独立头寸, 并行下到预测市场 / 运价衍生品 / 再保险 / 自留资金。`,
+                `Premium split into ${legs.length} parallel positions across prediction markets, freight derivatives, reinsurance, and retained capital.`,
+              )}
+            </div>
+          </div>
+          <div className="panel p-2.5">
+            <div className="text-amber tracking-widest text-[9px]">③  WATCH</div>
+            <div className="text-dim mt-1">
+              {t(
+                "AIS 船位 + 港到港数据持续监控。任一触发器命中, 自动结算赔付到你账上, 72h 内。",
+                "AIS + port-arrival data start monitoring. Any trigger fire → automatic payout to your account within 72 h.",
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="mx-5 mt-3 panel-raised p-4 flex flex-wrap gap-6 items-center">
         <div>
           <div className="label-kicker">/// {t("你的保费", "YOUR PREMIUM")}</div>
@@ -121,15 +166,11 @@ function SplitInner() {
           </div>
         </div>
         <div className="flex-1 min-w-[200px]">
-          <div className="label-kicker mb-2">/// {t("系统做了什么", "WHAT THE SYSTEM DID")}</div>
+          <div className="label-kicker mb-2">/// {t("简单说", "IN SHORT")}</div>
           <p className="text-[11px] text-dim leading-relaxed">
-            {t("平台把这一笔保费", "The platform split this premium ")}
-            <span className="text-amber">
-              {t(`拆成 ${legs.length} 个独立头寸`, `into ${legs.length} independent positions`)}
-            </span>
             {t(
-              ", 并行下到预测市场、运价衍生品、再保险和自留资本。每一份钱都明码标价, 任何一个对冲触发, 赔款都有来源。",
-              ", placed in parallel across prediction markets, freight derivatives, reinsurance, and retained capital. Every dollar is priced; any single hedge firing has a matched payout source.",
+              `${legs.length} 笔头寸彼此独立。任意一笔触发都有对应赔付来源 — 没有"一刀切, 不赔"的灰色地带。`,
+              `${legs.length} positions, each independent. Any single one firing has a matched payout source — no "blanket exclusion" gray zones.`,
             )}
           </p>
         </div>
