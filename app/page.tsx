@@ -64,14 +64,13 @@ export default function Home() {
         <section className="flex flex-col gap-3">
           <div className="flex items-baseline justify-between">
             <div className="label-kicker">
-              /// {t(
-                "三个 LEC 风格示例 · 2026 年 4 月真实背景",
-                "Three LEC-style examples · grounded in April 2026 events",
-              )}
+              /// {t("三个示例 · 跑一个看看", "THREE EXAMPLES · TRY ONE")}
             </div>
             <div className="text-[10px] text-faint tracking-widest">
-              <span className="text-amber">#01</span>{" "}
-              {t("霍尔木兹 · 当下最硬约束", "Hormuz · the hardest constraint right now")}
+              {t(
+                "点开任意一个 · 20 秒看到保单",
+                "click any · 20 seconds to a policy",
+              )}
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -271,9 +271,9 @@ export const CHOKEPOINTS: Record<string, Chokepoint> = {
 export const CASES: Case[] = [
   {
     id: "saudi-crude-yantai",
-    title: "沙特原油 → 烟台 · 多市场共振",
-    titleEn: "Saudi crude → Yantai · multi-market resonance",
-    subtitle: "FLAGSHIP · MULTI-FACTOR · RAS TANURA → YTG",
+    title: "沙特原油 → 中石化烟台炼厂",
+    titleEn: "Saudi crude → Sinopec Yantai refinery",
+    subtitle: "FLAGSHIP · RAS TANURA → YTG · 24-DAY VLCC",
     cargo: "Arabian Light Crude (沙特阿美轻质原油)",
     cargoEn: "Arabian Light Crude (Saudi Aramco light sweet)",
     hsCode: "2709.00",
@@ -476,9 +476,9 @@ export const CASES: Case[] = [
   },
   {
     id: "tsingtao-felixstowe",
-    title: "青岛啤酒 → Felixstowe · 夏季促销窗口",
-    titleEn: "Tsingtao Beer → Felixstowe · summer promo window",
-    subtitle: "REAL BIZ · QINGDAO → FELIXSTOWE (UK)",
+    title: "青岛啤酒 → 英国 Felixstowe",
+    titleEn: "Tsingtao Beer → UK Felixstowe",
+    subtitle: "QINGDAO → FELIXSTOWE · 6 x 40FT REEFER · 夏季促销",
     cargo: "青岛啤酒 · 500ml 罐装 · 混合 SKU",
     cargoEn: "Tsingtao Beer · 500ml cans · mixed SKUs",
     hsCode: "2203.00",
@@ -663,9 +663,9 @@ export const CASES: Case[] = [
   },
   {
     id: "xbot-heathrow",
-    title: "XBOT 清洁机器人 → Heathrow T5 投产",
-    titleEn: "XBOT cleaning robots → Heathrow T5 go-live",
-    subtitle: "REAL BIZ · SZX → LHR via Southampton",
+    title: "XBOT 清洁机器人 → 伦敦希思罗机场",
+    titleEn: "XBOT cleaning robots → London Heathrow",
+    subtitle: "SHENZHEN → LHR · 50 台 + 调试套件 · T5 投产",
     cargo: "XBOT 商用清洁机器人 · 50 台 + 调试套件",
     cargoEn: "XBOT commercial cleaning robots · 50 units + commissioning kit",
     hsCode: "8479.89",

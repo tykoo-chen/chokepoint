@@ -1,8 +1,5 @@
 "use client";
 import BetBasisBanner from "@/app/components/BetBasisBanner";
-import CoverageViz from "@/app/components/CoverageViz";
-import FactorDecomposition from "@/app/components/FactorDecomposition";
-import HedgeWaterfall from "@/app/components/HedgeWaterfall";
 import InsureButton from "@/app/components/InsureButton";
 import PlainLanguage from "@/app/components/PlainLanguage";
 import ScenarioPanel from "@/app/components/ScenarioPanel";
@@ -11,16 +8,27 @@ import TopBar from "@/app/components/TopBar";
 import { caseById, chokepointsFor, L } from "@/app/lib/cases";
 import { useLang, useT } from "@/app/lib/i18n";
 import { useLiveChokepoints } from "@/app/lib/markets";
-import { buildRiskModel, fmtMoney, fmtMoneyLong, fmtPct } from "@/app/lib/risk";
+import { buildRiskModel, fmtMoney, fmtMoneyLong } from "@/app/lib/risk";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useMemo } from "react";
 
+/**
+ * Customer layer (decision-grade).
+ *
+ * The buyer of the policy lands here. They see only what they need to act:
+ * who's holding the policy, the bet basis (4 inputs), the 4 named scenarios,
+ * the premium, the max payout, and a 'lock' button. Nothing else.
+ *
+ * The technical decomposition (factor cards · market prices · hedge waterfall ·
+ * coverage waterfall · trigger ladder) lives at /map (the X-Ray view), reachable
+ * via the explicit "see how AI got these numbers →" link.
+ */
 function QuoteInner() {
   const t = useT();
   const { lang } = useLang();
   const params = useSearchParams();
-  const caseId = params.get("case") ?? "hormuz2026";
+  const caseId = params.get("case") ?? "saudi-crude-yantai";
   const case_ = caseById(caseId);
   const baseChokepoints = useMemo(() => chokepointsFor(case_), [case_.id]);
   const { chokepoints } = useLiveChokepoints(baseChokepoints);
@@ -28,11 +36,12 @@ function QuoteInner() {
   const threat = Math.min(10, Math.round(risk.combinedDisruptionProb * 13));
 
   const title = L(case_.title, case_.titleEn, lang);
+  const ccy = case_.currency;
 
   return (
     <div className="relative z-10 min-h-screen flex flex-col">
       <TopBar
-        screen={`${t("报价", "QUOTE")} · ${case_.id.toUpperCase()}`}
+        screen={`${t("保单", "POLICY")} · ${case_.id.toUpperCase()}`}
         threat={threat}
       />
       <Ticker />
@@ -43,11 +52,7 @@ function QuoteInner() {
             {t("录入", "INTAKE")}
           </Link>
           <span className="text-faint">/</span>
-          <Link href={`/map?case=${case_.id}`} className="text-faint hover:text-amber">
-            {t("地图", "MAP")}
-          </Link>
-          <span className="text-faint">/</span>
-          <span className="text-amber">{t("报价", "QUOTE")}</span>
+          <span className="text-amber">{t("保单 · 客户视图", "POLICY · CUSTOMER VIEW")}</span>
           <span className="text-faint">· {title}</span>
         </div>
         <div className="text-[10px] text-faint tracking-widest flex items-center gap-2">
@@ -62,23 +67,26 @@ function QuoteInner() {
 
       <main className="flex-1 grid grid-cols-12 gap-4 px-5 py-4">
         <section className="col-span-12 lg:col-span-8 flex flex-col gap-4">
+          {/* Decision-row: only what matters for buy/skip */}
           <div className="panel-raised p-4 flex flex-wrap gap-6 items-center">
-            <div className="flex-1 min-w-[160px]">
+            <div className="flex-1 min-w-[180px]">
               <div className="label-kicker">{t("航次", "VOYAGE")}</div>
               <div className="text-sm text-text mt-0.5">{title}</div>
               <div className="text-[11px] text-faint">{case_.subtitle}</div>
             </div>
-            <Stat k={t("货值", "VALUE")} v={fmtMoneyLong(case_.cargoValueUsd, case_.currency)} />
-            <Stat k={t("扰动率", "DISRUPT.")} v={fmtPct(risk.combinedDisruptionProb, 1)} tone="amber" />
             <Stat
-              k={t("P90 延误", "P90 DELAY")}
-              v={`${risk.p90DelayDays} ${t("天", "days")}`}
+              k={t("货值", "VALUE")}
+              v={fmtMoneyLong(case_.cargoValueUsd, ccy)}
+            />
+            <Stat
+              k={t("这一票保费", "PREMIUM")}
+              v={fmtMoney(risk.premiumUsd, ccy)}
               tone="amber"
             />
             <Stat
-              k={t("期望损失", "EXP. LOSS")}
-              v={fmtMoney(risk.expectedLossUsd, case_.currency)}
-              tone="red"
+              k={t("最多赔回", "MAX PAYOUT")}
+              v={fmtMoney(risk.recommendedCoverageUsd, ccy)}
+              tone="green"
             />
           </div>
 
@@ -88,68 +96,30 @@ function QuoteInner() {
             <ScenarioPanel case_={case_} />
           )}
 
-          {case_.factors && case_.factors.length > 0 && (
-            <FactorDecomposition case_={case_} chokepoints={chokepoints} />
-          )}
-
-          <CoverageViz case_={case_} risk={risk} />
-
-          <div className="panel-raised">
-            <div className="px-4 py-2.5 border-b border-line flex items-center justify-between">
-              <div className="label-kicker">
-                /// {t("赔付触发器 · 由预言机自动确认", "PAYOUT TRIGGERS · oracle-confirmed")}
+          {/* Crosslink — fold the X-Ray underneath */}
+          <Link
+            href={`/map?case=${case_.id}`}
+            className="group panel-raised p-4 flex items-center justify-between border-amber-dim hover:border-amber transition-colors"
+          >
+            <div>
+              <div className="label-kicker text-amber-dim group-hover:text-amber">
+                /// {t("好奇 AI 是怎么算出这些数的?", "CURIOUS HOW AI GOT THESE NUMBERS?")}
               </div>
-              <div className="text-[10px] text-faint">
-                {t("两源独立交叉确认", "Two-source cross-verified")}
+              <div className="text-[12px] text-dim mt-1 leading-relaxed">
+                {t(
+                  "进 X-Ray 视图: 实时 Polymarket 因子 + 路线风险点 + 保费拆单去向。给评委 / 风控 / 投资人看的版本。",
+                  "Open X-Ray view: live Polymarket factor cards · chokepoint risks · premium-allocation breakdown. The version for reviewers / risk / investors.",
+                )}
               </div>
             </div>
-            <div className="divide-y divide-[var(--line)]">
-              {risk.triggers.map((tg) => (
-                <div
-                  key={tg.code}
-                  className="grid grid-cols-12 items-center px-4 py-2.5 gap-3 text-[11px]"
-                >
-                  <div className="col-span-3 text-amber tracking-widest">{tg.code}</div>
-                  <div className="col-span-5 text-dim">{tg.description}</div>
-                  <div className="col-span-2 text-[10px] text-faint">{tg.source}</div>
-                  <div className="col-span-2 text-right text-amber tabular-nums">
-                    {t("赔 ", "Pay ")}
-                    {fmtMoney(tg.payoutUsd, case_.currency)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+            <span className="text-amber group-hover:text-amber-bright text-[13px] tracking-widest">
+              {t("打开 X-RAY →", "OPEN X-RAY →")}
+            </span>
+          </Link>
         </section>
 
         <aside className="col-span-12 lg:col-span-4 flex flex-col gap-4">
           <InsureButton risk={risk} caseId={case_.id} currency={case_.currency} />
-          <HedgeWaterfall risk={risk} currency={case_.currency} case_={case_} />
-          <div className="panel-raised p-4 text-[11px] text-dim leading-relaxed">
-            <div className="label-kicker mb-2">
-              /// {t("为什么需要这张保单", "WHY THIS POLICY")}
-            </div>
-            <p>
-              {t("传统货运险只管「", "Traditional cargo cover only handles ")}
-              <span className="text-faint">
-                {t("货物物理损坏", "physical damage to cargo")}
-              </span>
-              {t("」。大多数情况下, ", ". Most of the time ")}
-              <span className="text-amber">{t("时间损失", "time loss")}</span>
-              {t(
-                "是不赔的 — 而时间损失才是你实际的生意损失。",
-                " is not covered — and time loss IS the actual business loss.",
-              )}
-            </p>
-            <p className="mt-2">
-              {t("这张保单按", "This policy pays on ")}
-              <span className="text-amber">{t("时间戳", "timestamps")}</span>
-              {t(
-                "赔, 不按定损单赔。触发器一响, 72 小时内到账, 不用和理赔员扯皮, 不用等卸货查勘。",
-                ", not adjuster reports. When a trigger fires, money lands within 72 hours — no haggling, no port surveys.",
-              )}
-            </p>
-          </div>
         </aside>
       </main>
 
@@ -161,8 +131,15 @@ function QuoteInner() {
   );
 }
 
-function Stat({ k, v, tone }: { k: string; v: string; tone?: "amber" | "red" }) {
-  const cls = tone === "amber" ? "text-amber" : tone === "red" ? "text-red" : "text-dim";
+function Stat({ k, v, tone }: { k: string; v: string; tone?: "amber" | "red" | "green" }) {
+  const cls =
+    tone === "amber"
+      ? "text-amber"
+      : tone === "red"
+        ? "text-red"
+        : tone === "green"
+          ? "text-green"
+          : "text-dim";
   return (
     <div>
       <div className="text-[10px] text-faint tracking-widest">{k}</div>

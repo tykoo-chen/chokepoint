@@ -1,8 +1,10 @@
 "use client";
 import BetBasisBanner from "@/app/components/BetBasisBanner";
 import ChokepointPanel from "@/app/components/ChokepointPanel";
+import CoverageViz from "@/app/components/CoverageViz";
 import FactorDecomposition from "@/app/components/FactorDecomposition";
 import Globe from "@/app/components/Globe";
+import HedgeWaterfall from "@/app/components/HedgeWaterfall";
 import ShipmentPanel from "@/app/components/ShipmentPanel";
 import Ticker from "@/app/components/Ticker";
 import TopBar from "@/app/components/TopBar";
@@ -39,7 +41,7 @@ function MapInner() {
   return (
     <div className="relative z-10 min-h-screen flex flex-col">
       <TopBar
-        screen={`${t("地图", "MAP")} · ${case_.id.toUpperCase()}`}
+        screen={`${t("X-RAY", "X-RAY")} · ${case_.id.toUpperCase()}`}
         threat={threat}
       />
       <Ticker />
@@ -50,14 +52,16 @@ function MapInner() {
             ← {t("录入", "INTAKE")}
           </Link>
           <span className="text-faint">/</span>
-          <span className="text-amber">{title}</span>
-          <span className="text-faint">· {case_.subtitle}</span>
+          <span className="text-amber">
+            {t("X-RAY 拆解视图", "X-RAY · BREAKDOWN VIEW")}
+          </span>
+          <span className="text-faint">· {title}</span>
         </div>
         <Link
           href={`/quote?case=${case_.id}`}
           className="btn-amber px-4 py-1.5 text-xs tracking-widest"
         >
-          {t("下一步 · 报价 →", "NEXT · QUOTE →")}
+          ← {t("回到保单", "BACK TO POLICY")}
         </Link>
       </div>
 
@@ -223,17 +227,57 @@ function MapInner() {
               href={`/quote?case=${case_.id}`}
               className="mt-3 btn-amber w-full text-center py-2 text-xs tracking-widest block"
             >
-              {t("去报价 →", "GO TO QUOTE →")}
+              ← {t("回到保单", "BACK TO POLICY")}
             </Link>
           </div>
         </aside>
       </main>
 
       {case_.factors && case_.factors.length > 0 && (
-        <div className="px-5 pb-6">
+        <div className="px-5 pb-4">
           <FactorDecomposition case_={case_} chokepoints={chokepoints} />
         </div>
       )}
+
+      {/* Coverage waterfall — what the policy bails out at each loss tier */}
+      <div className="px-5 pb-4">
+        <CoverageViz case_={case_} risk={risk} />
+      </div>
+
+      {/* Hedge waterfall — where the premium goes (PM / reinsurance / derivatives) */}
+      <div className="px-5 pb-4">
+        <HedgeWaterfall risk={risk} currency={case_.currency} case_={case_} />
+      </div>
+
+      {/* Trigger ladder — the parametric mechanics */}
+      <div className="px-5 pb-6">
+        <div className="panel-raised">
+          <div className="px-4 py-2.5 border-b border-line flex items-center justify-between">
+            <div className="label-kicker">
+              /// {t("赔付触发器 · 由预言机自动确认", "PAYOUT TRIGGERS · oracle-confirmed")}
+            </div>
+            <div className="text-[10px] text-faint">
+              {t("两源独立交叉确认", "Two-source cross-verified")}
+            </div>
+          </div>
+          <div className="divide-y divide-[var(--line)]">
+            {risk.triggers.map((tg) => (
+              <div
+                key={tg.code}
+                className="grid grid-cols-12 items-center px-4 py-2.5 gap-3 text-[11px]"
+              >
+                <div className="col-span-3 text-amber tracking-widest">{tg.code}</div>
+                <div className="col-span-5 text-dim">{tg.description}</div>
+                <div className="col-span-2 text-[10px] text-faint">{tg.source}</div>
+                <div className="col-span-2 text-right text-amber tabular-nums">
+                  {t("赔 ", "Pay ")}
+                  {fmtMoney(tg.payoutUsd, case_.currency)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
