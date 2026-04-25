@@ -1,10 +1,8 @@
 "use client";
 import BetBasisBanner from "@/app/components/BetBasisBanner";
 import CoverageViz from "@/app/components/CoverageViz";
-import FactorDecomposition from "@/app/components/FactorDecomposition";
 import HedgeWaterfall from "@/app/components/HedgeWaterfall";
 import InsureButton from "@/app/components/InsureButton";
-import LiveMarketsAccordion from "@/app/components/LiveMarketsAccordion";
 import PlainLanguage from "@/app/components/PlainLanguage";
 import ScenarioPanel from "@/app/components/ScenarioPanel";
 import Ticker from "@/app/components/Ticker";
@@ -95,15 +93,6 @@ function QuoteInner() {
 
           {case_.scenarios && case_.scenarios.length > 0 && (
             <ScenarioPanel case_={case_} />
-          )}
-
-          {/* Full-width live markets dropdown — 13 markets across chokepoints
-              + factors. Default-open, click header to collapse. Sits in the
-              col-span-8 main area so it fills the middle-left whitespace. */}
-          <LiveMarketsAccordion defaultOpen />
-
-          {case_.factors && case_.factors.length > 0 && (
-            <FactorDecomposition case_={case_} chokepoints={chokepoints} />
           )}
 
           <CoverageViz case_={case_} risk={risk} />

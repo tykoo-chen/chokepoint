@@ -1,9 +1,7 @@
 "use client";
 import BetBasisBanner from "@/app/components/BetBasisBanner";
 import ChokepointPanel from "@/app/components/ChokepointPanel";
-import FactorDecomposition from "@/app/components/FactorDecomposition";
 import Globe from "@/app/components/Globe";
-import LiveMarketsAccordion from "@/app/components/LiveMarketsAccordion";
 import ShipmentPanel from "@/app/components/ShipmentPanel";
 import Ticker from "@/app/components/Ticker";
 import TopBar from "@/app/components/TopBar";
@@ -230,17 +228,6 @@ function MapInner() {
         </aside>
       </main>
 
-      {case_.factors && case_.factors.length > 0 && (
-        <div className="px-5 pb-4">
-          <FactorDecomposition case_={case_} chokepoints={chokepoints} />
-        </div>
-      )}
-
-      {/* Full-width live markets — every chokepoint + factor in the system,
-          collapsible. Default open. */}
-      <div className="px-5 pb-6">
-        <LiveMarketsAccordion defaultOpen />
-      </div>
     </div>
   );
 }

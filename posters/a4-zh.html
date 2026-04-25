@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>JUSTINCASE · 万一 · A4 (中文)</title>
+<style>
+  @page { size: A4; margin: 0; }
+
+  :root {
+    --bg: #07090d;
+    --panel: #0e1218;
+    --line: #1a2230;
+    --amber: #ffb347;
+    --amber-dim: #b07b30;
+    --amber-bright: #ffc870;
+    --green: #7dffb1;
+    --red: #ff5a4a;
+    --text: #d6dde6;
+    --dim: #7b8896;
+    --faint: #4a5663;
+  }
+
+  html, body { margin: 0; padding: 0; }
+  body {
+    width: 210mm;
+    height: 297mm;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background-image:
+      radial-gradient(circle at 50% -10%, rgba(255,179,71,0.10) 0%, transparent 40%),
+      linear-gradient(rgba(255,179,71,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,179,71,0.025) 1px, transparent 1px);
+    background-size: auto, 20px 20px, 20px 20px;
+    overflow: hidden;
+  }
+
+  body::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0 1px, transparent 1px 3px);
+    pointer-events: none;
+  }
+
+  .frame { position: absolute; inset: 12mm; display: flex; flex-direction: column; box-sizing: border-box; }
+
+  .corner-meta {
+    display: flex; justify-content: space-between;
+    font-size: 7pt; letter-spacing: 0.3em; color: var(--faint);
+    margin-bottom: 8mm;
+  }
+  .corner-meta .dot { display: inline-block; width: 5px; height: 5px; background: var(--amber); border-radius: 50%; margin-right: 6px; }
+
+  .header { padding-bottom: 8mm; border-bottom: 1.5px solid var(--amber); }
+  .wordmark { font-size: 38pt; line-height: 1; color: var(--amber); letter-spacing: 0.06em; font-weight: 700; }
+  .wordmark .cn { color: var(--amber-bright); margin-left: 6mm; font-size: 0.55em; vertical-align: 0.2em; }
+  .tagline { font-size: 16pt; color: var(--text); margin-top: 4mm; line-height: 1.25; font-weight: 500; }
+  .tagline .accent { color: var(--amber); }
+  .tagline-en { font-size: 9pt; color: var(--dim); margin-top: 2mm; letter-spacing: 0.04em; }
+
+  .section { padding: 6mm 0; border-bottom: 1px solid var(--line); }
+  .section:last-child { border-bottom: none; }
+  .section-kicker { font-size: 7.5pt; color: var(--amber); letter-spacing: 0.3em; margin-bottom: 3mm; }
+  .section-title { font-size: 12pt; color: var(--text); line-height: 1.3; font-weight: 600; }
+
+  .gap-box {
+    display: flex; gap: 4mm; padding: 5mm;
+    background: rgba(255,90,74,0.07); border-left: 2.5mm solid var(--red);
+    margin-top: 3mm;
+  }
+  .gap-box .left { font-size: 14pt; color: var(--red); font-weight: 700; }
+  .gap-box .text { font-size: 9pt; line-height: 1.5; color: var(--text); }
+  .gap-box .text .strike { text-decoration: line-through; color: var(--faint); }
+  .gap-box .text .em { color: var(--amber); font-weight: 600; }
+
+  .steps { display: grid; grid-template-columns: 8mm 1fr; gap: 3mm 4mm; margin-top: 3mm; }
+  .step-num { font-size: 11pt; color: var(--amber); font-weight: 700; }
+  .step-zh { font-size: 9.5pt; color: var(--text); font-weight: 600; line-height: 1.3; }
+  .step-en { font-size: 7pt; color: var(--dim); margin-top: 1mm; line-height: 1.4; }
+
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-top: 3mm; }
+  .stat { padding: 4mm; background: var(--panel); border: 1px solid var(--line); border-left: 2mm solid var(--amber); }
+  .stat .num { font-size: 22pt; color: var(--amber); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat .unit { font-size: 6.5pt; color: var(--amber-dim); letter-spacing: 0.25em; margin-top: 2mm; }
+  .stat .desc { font-size: 7pt; color: var(--dim); margin-top: 2mm; line-height: 1.4; }
+
+  .holder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; margin-top: 3mm; }
+  .holder { padding: 3.5mm; background: var(--panel); border: 1px solid var(--line); }
+  .holder .who { font-size: 6.5pt; color: var(--green); letter-spacing: 0.25em; margin-bottom: 1.5mm; }
+  .holder .who.seller { color: var(--amber); }
+  .holder .body { font-size: 7.5pt; color: var(--text); line-height: 1.4; }
+  .holder .body .em { color: var(--amber); }
+
+  .feeds { display: flex; flex-wrap: wrap; gap: 2mm; margin-top: 3mm; }
+  .feed-tag { font-size: 6.5pt; color: var(--dim); border: 1px solid var(--line); padding: 1mm 2.5mm; letter-spacing: 0.1em; }
+  .feed-tag.real { color: var(--green); border-color: rgba(125,255,177,0.3); }
+
+  .footer {
+    margin-top: auto; padding-top: 6mm;
+    border-top: 1.5px solid var(--amber);
+    display: grid; grid-template-columns: 1fr 32mm; gap: 5mm; align-items: center;
+  }
+  .cta-kicker { font-size: 7pt; color: var(--amber); letter-spacing: 0.3em; }
+  .cta-url { font-size: 13pt; color: var(--text); font-weight: 600; line-height: 1.1; margin-top: 1.5mm; word-break: break-all; }
+  .cta-tag { font-size: 7pt; color: var(--amber-dim); margin-top: 2mm; }
+  .qr-box { width: 32mm; height: 32mm; background: white; padding: 1.5mm; box-sizing: border-box; }
+  .qr-box img { width: 100%; height: 100%; display: block; }
+
+  .corner { position: absolute; width: 6mm; height: 6mm; border: 0.5mm solid var(--amber); }
+  .corner.tl { top: 5mm; left: 5mm; border-right: none; border-bottom: none; }
+  .corner.tr { top: 5mm; right: 5mm; border-left: none; border-bottom: none; }
+  .corner.bl { bottom: 5mm; left: 5mm; border-right: none; border-top: none; }
+  .corner.br { bottom: 5mm; right: 5mm; border-left: none; border-top: none; }
+</style>
+</head>
+<body>
+  <span class="corner tl"></span><span class="corner tr"></span>
+  <span class="corner bl"></span><span class="corner br"></span>
+
+  <div class="frame">
+    <div class="corner-meta">
+      <span><span class="dot"></span>JUSTINCASE · v0.1 · DEMO</span>
+      <span>2026 · #ATTRAX 春潮 SPRING 黑客松</span>
+    </div>
+
+    <div class="header">
+      <div class="wordmark">JUSTINCASE<span class="cn">万一</span></div>
+      <div class="tagline">货晚了, <span class="accent">我们照赔。</span></div>
+      <div class="tagline-en">Parametric supply-chain delay insurance, priced live by Polymarket.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-kicker">/// 01 · 真问题 · THE GAP</div>
+      <div class="section-title">全球贸易里 60% 的痛是延误, 但传统货运险只赔货损。</div>
+      <div class="gap-box">
+        <div class="left">⚠</div>
+        <div class="text">
+          ICC-A 条款 <span class="strike">明文排除 delay loss</span> —
+          船没沉、货也没坏, 可你晚到两周, 错过促销窗 / 工程师空等 / 客户按天罚款。
+          <span class="em">这块, 没人保。</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-kicker">/// 02 · 我们怎么做 · HOW IT WORKS</div>
+      <div class="steps">
+        <div class="step-num">①</div>
+        <div>
+          <div class="step-zh">接你企业的 Agent</div>
+          <div class="step-en">Claude Code · Open Cloud · MCP · ERP / 合同 / 项目台账 / ops 模型 — 直接读, 不再 PDF 上传</div>
+        </div>
+        <div class="step-num">②</div>
+        <div>
+          <div class="step-zh">AI 拆 4-5 维独立风险</div>
+          <div class="step-en">Claude Opus 4.7 + Sonnet 4.6 · 海峡 · 天气 · 原料 · 政策 · 宏观</div>
+        </div>
+        <div class="step-num">③</div>
+        <div>
+          <div class="step-zh">Polymarket 实时定价</div>
+          <div class="step-en">每条风险都绑一个真实预测市场合约, 报价 = 市场价, 不是精算师拍脑袋</div>
+        </div>
+        <div class="step-num">④</div>
+        <div>
+          <div class="step-zh">一键投保 + 拆单对冲</div>
+          <div class="step-en">保费分到 Polymarket / 再保险 / 衍生品 · AIS + 港到港时间戳 · 72h 到账</div>
+        </div>
+      </div>
+      <div class="feeds">
+        <span class="feed-tag real">● POLYMARKET · 实时</span>
+        <span class="feed-tag">AIS · SPIRE</span>
+        <span class="feed-tag">IMF PORTWATCH</span>
+        <span class="feed-tag">KALSHI</span>
+        <span class="feed-tag">LLOYD'S LIST</span>
+        <span class="feed-tag">BALTIC EXCHANGE</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-kicker">/// 03 · 关键数字 · NUMBERS</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="num">20s</div>
+          <div class="unit">从提单到保单</div>
+          <div class="desc">B/L → 报价 · 全自动 · 行业平均 7 周</div>
+        </div>
+        <div class="stat">
+          <div class="num">72h</div>
+          <div class="unit">从触发到到账</div>
+          <div class="desc">触发器响 → 智能合约赔付 · 不见理赔员</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-kicker">/// 04 · 谁买 · WHO IT'S FOR</div>
+      <div class="holder-grid">
+        <div class="holder">
+          <div class="who">买方 · BUYER (CFR/CIF/FOB · 75%+)</div>
+          <div class="body">进口商 · 贸易台 · 渠道分销 — 在 <span class="em">"晚一天=$X"</span> 这条 LD 里签过名的</div>
+        </div>
+        <div class="holder">
+          <div class="who seller">卖方 · SELLER (DAP/DDP · 项目类)</div>
+          <div class="body">EPC · 系统集成 · 设备出口 — 把 <span class="em">go-live</span> 钉死在合同的那批</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>
+        <div class="cta-kicker">/// LIVE DEMO · 扫码体验</div>
+        <div class="cta-url">chokepoint-nine.vercel.app</div>
+        <div class="cta-tag">#AttraX 春潮 Spring 黑客松 · 2026.04 · github.com/tykoo-chen/chokepoint</div>
+      </div>
+      <div class="qr-box">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=8&data=https://chokepoint-nine.vercel.app" alt="QR" />
+      </div>
+    </div>
+  </div>
+</body>
+</html>
