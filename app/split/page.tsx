@@ -1,4 +1,5 @@
 "use client";
+import BetBasisBanner from "@/app/components/BetBasisBanner";
 import MarketLeg from "@/app/components/MarketLeg";
 import Ticker from "@/app/components/Ticker";
 import TopBar from "@/app/components/TopBar";
@@ -95,6 +96,10 @@ function SplitInner() {
             </>
           )}
         </div>
+      </div>
+
+      <div className="mx-5 mt-3">
+        <BetBasisBanner case_={case_} />
       </div>
 
       {/* Big "what just happened" intro */}

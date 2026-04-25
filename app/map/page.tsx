@@ -1,4 +1,5 @@
 "use client";
+import BetBasisBanner from "@/app/components/BetBasisBanner";
 import ChokepointPanel from "@/app/components/ChokepointPanel";
 import FactorDecomposition from "@/app/components/FactorDecomposition";
 import Globe from "@/app/components/Globe";
@@ -97,6 +98,10 @@ function MapInner() {
           )}
         </div>
       )}
+
+      <div className="mx-5 mt-3">
+        <BetBasisBanner case_={case_} />
+      </div>
 
       <main className="flex-1 grid grid-cols-12 gap-4 px-5 py-4">
         <aside className="col-span-12 lg:col-span-3 flex flex-col gap-4">

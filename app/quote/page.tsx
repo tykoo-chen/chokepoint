@@ -1,4 +1,5 @@
 "use client";
+import BetBasisBanner from "@/app/components/BetBasisBanner";
 import CoverageViz from "@/app/components/CoverageViz";
 import FactorDecomposition from "@/app/components/FactorDecomposition";
 import HedgeWaterfall from "@/app/components/HedgeWaterfall";
@@ -52,6 +53,10 @@ function QuoteInner() {
           <span className="w-1.5 h-1.5 rounded-full bg-green pulse-dot" />
           {t("报价锁定 · 剩余 15:00", "QUOTE LOCKED · 15:00 remaining")}
         </div>
+      </div>
+
+      <div className="mx-5 mt-3">
+        <BetBasisBanner case_={case_} />
       </div>
 
       <main className="flex-1 grid grid-cols-12 gap-4 px-5 py-4">
